@@ -1,0 +1,855 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bookworm</title>
+<style>
+  :root { --bg: #14131a; }
+  html, body { margin: 0; height: 100%; background: var(--bg); font: 13px/1.4 -apple-system, system-ui, sans-serif; }
+  body { display: grid; place-items: center; overflow: hidden; }
+  #stage { width: min(100vw, 100vh); height: min(100vw, 100vh); display: block; cursor: pointer; }
+  #status { position: fixed; left: 16px; bottom: 14px; right: 16px; color: #b9b3cc; opacity: 0; transition: opacity .4s; pointer-events: none; }
+  #status.on { opacity: 1; }
+  #status b { color: #fde15e; font-weight: 600; }
+  body.drag #stage { outline: 3px dashed #7e57e8; outline-offset: -12px; }
+  body.capture #status, body.capture #controls { display: none; }
+  body.embed #status { display: none; }
+  #controls { position: fixed; top: 14px; right: 16px; display: flex; gap: 8px; }
+  #controls button { background: rgba(255,255,255,.08); color: #e9e4f7; border: 1px solid rgba(255,255,255,.16); border-radius: 999px; padding: 6px 12px; font: inherit; cursor: pointer; }
+  #controls button[aria-pressed="false"] { opacity: .45; }
+</style>
+</head>
+<body>
+<div id="controls">
+  <button id="btnSound" aria-pressed="true">Sound on</button>
+  <button id="btnHaptics" aria-pressed="true" hidden>Haptics on</button>
+</div>
+<svg id="stage" viewBox="0 0 1000 1000" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <path id="fx-star" d="M0,-1 C0.12,-0.12 0.12,-0.12 1,0 C0.12,0.12 0.12,0.12 0,1 C-0.12,0.12 -0.12,0.12 -1,0 C-0.12,-0.12 -0.12,-0.12 0,-1 Z"/>
+    <linearGradient id="fx-shine" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset="0.5" stop-color="#fff" stop-opacity="1"/><stop offset="1" stop-color="#fff" stop-opacity="0"/>
+    </linearGradient>
+    <radialGradient id="fx-glow">
+      <stop offset="0" stop-color="#7e57e8" stop-opacity="0.45"/><stop offset="1" stop-color="#7e57e8" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="fx-vignette" cx="0.5" cy="0.5" r="0.75">
+      <stop offset="0.55" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity="0.5"/>
+    </radialGradient>
+    <filter id="fx-drop" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="22" stdDeviation="20" flood-color="#05040a" flood-opacity="0.55"/>
+    </filter>
+    <linearGradient id="fx-ray" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#ffd27a" stop-opacity="0"/><stop offset="0.22" stop-color="#ffd27a" stop-opacity="0.6"/>
+      <stop offset="0.6" stop-color="#ffc85a" stop-opacity="0.32"/><stop offset="1" stop-color="#ffc85a" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="fx-raysoft" x="-10%" y="-10%" width="120%" height="120%"><feGaussianBlur stdDeviation="2.2"/></filter>
+  </defs>
+  <rect width="1000" height="1000" fill="#14131a"/>
+  <circle id="fx-glowDisc" cx="500" cy="500" r="470" fill="url(#fx-glow)"/>
+  <g id="fx-rays" filter="url(#fx-raysoft)"></g>
+  <rect width="1000" height="1000" fill="url(#fx-vignette)"/>
+  <circle id="fx-ringGold" fill="none" stroke="#fde15e"/>
+  <circle id="fx-ringWhite" fill="none" stroke="#f6eaea"/>
+  <g id="fx-confetti"></g>
+  <g id="fx-twinkles"></g>
+  <!-- the artwork from bookworm-badge.svg is placed here -->
+  <g id="fx-art"></g>
+</svg>
+<div id="status"></div>
+
+<script>
+(() => {
+  // ---------------------------------------------------------------------------
+  // Settings
+  // ---------------------------------------------------------------------------
+  const params = new URLSearchParams(location.search);
+  const CONFIG = {
+    svg: params.get('svg') || 'bookworm-badge.svg',
+    intro: 4.42,        // seconds of intro before the idle loop starts
+    loop: 4            // idle loop length in seconds (everything idle repeats on this period)
+  };
+  const LAYERS = ['badge', 'medal', 'ribbon-left', 'ribbon-right', 'book', 'book-closed', 'closed-front', 'spine', 'cover-left', 'cover-right', 'pages-left', 'pages-right', 'leaves', 'bookmark', 'star', 'burst', 'sparkles'];
+  window.BADGE_CONFIG = CONFIG;
+
+  // ---------------------------------------------------------------------------
+  // Helpers
+  // ---------------------------------------------------------------------------
+  const NS = 'http://www.w3.org/2000/svg';
+  const $ = id => document.getElementById(id);
+  const TAU = Math.PI * 2, DEG = 180 / Math.PI;
+  const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+  const prog = (t, a, b) => clamp((t - a) / (b - a));
+  const lerp = (a, b, k) => a + (b - a) * k;
+  const easeOutCubic = k => 1 - Math.pow(1 - k, 3);
+  const easeInOutCubic = k => k < .5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
+  const easeOutBack = (k, s = 1.9) => 1 + (s + 1) * Math.pow(k - 1, 3) + s * Math.pow(k - 1, 2);
+  const easeOutElastic = k => k === 0 ? 0 : k === 1 ? 1 : Math.pow(2, -10 * k) * Math.sin((k * 10 - .75) * (2 * Math.PI / 3)) + 1;
+  const set = (el, attrs) => { if (el) for (const k in attrs) el.setAttribute(k, attrs[k]); };
+  const make = (tag, attrs, parent) => { const el = document.createElementNS(NS, tag); set(el, attrs); if (parent) parent.appendChild(el); return el; };
+  const SHAPES = 'path,rect,circle,ellipse,line,polyline,polygon';
+  const shapesOf = el => el.matches(SHAPES) ? [el] : [...el.querySelectorAll(SHAPES)];
+
+  // Find a layer by name. Accepts exact ids, plus the suffixes Figma / Illustrator add (rocket_2, rocket_1_).
+  function findLayer(root, name) {
+    const variants = [name, name.replace(/-/g, '_'), name.replace(/-/g, ' ')];
+    for (const v of variants) {
+      const exact = root.querySelector(`[id="${CSS.escape(v)}"]`);
+      if (exact) return exact;
+    }
+    const all = [...root.querySelectorAll('[id]')];
+    for (const v of variants) {
+      const re = new RegExp('^' + v.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '(_\\d+_?|-\\d+)?$', 'i');
+      const hit = all.find(e => re.test(e.id));
+      if (hit) return hit;
+    }
+    return null;
+  }
+
+  // Put a fresh <g> around an element so the animation never overwrites the artwork's own transform.
+  function wrap(el) {
+    const g = document.createElementNS(NS, 'g');
+    el.parentNode.insertBefore(g, el);
+    g.appendChild(el);
+    return g;
+  }
+
+  // Convert a point / direction between the stage and an element's coordinate space.
+  const stageSvg = $('stage');
+  function toLocal(el, x, y) {          // stage → el space
+    const m = el.getScreenCTM().inverse().multiply(stageSvg.getScreenCTM());
+    return new DOMPoint(x, y).matrixTransform(m);
+  }
+  function dirLocal(el, dx, dy) {       // stage direction → el space (unit vector + angle)
+    const a = toLocal(el, 0, 0), b = toLocal(el, dx, dy);
+    const vx = b.x - a.x, vy = b.y - a.y, len = Math.hypot(vx, vy) || 1;
+    return { x: vx / len, y: vy / len, angle: Math.atan2(vx / len, -vy / len) * DEG };
+  }
+  function stageBox(el) {               // element bounds in stage coordinates
+    const r = el.getBoundingClientRect(), s = stageSvg.getBoundingClientRect();
+    const k = 1000 / s.width;
+    return { x: (r.left - s.left) * k, y: (r.top - s.top) * k, w: r.width * k, h: r.height * k };
+  }
+
+  // ---------------------------------------------------------------------------
+  // Rig: load the SVG and attach animation handles to its layers
+  // ---------------------------------------------------------------------------
+  let rig = null;
+  let seed;
+  const rnd = () => (seed = (seed * 16807) % 2147483647, (seed - 1) / 2147483646);
+
+  // Key moments (seconds)
+  const T = {
+    ribbons: 0.16,
+    drop: [0.34, 0.72],            // closed book falls, lands at drop[1]
+    open: [0.9, 1.34],             // front cover swings open: [start, end]
+    swap: 1.08,                    // front cover is edge-on: closed book → open covers
+    pages: 1.04, pageGap: 0.06, pageGrow: 0.36,   // page layers fan up out of the gutter, back → front
+    leaves: [1.52, 1.66, 1.8, 1.94], leafDur: 0.34,  // loose leaves flip right → left (flutter)
+    bookmark: [2.38, 2.86],        // ribbon unfurls down
+    star: [2.74, 3.18], burst: 3.1,
+    impact: 3.4, stars: 3.48, shine: [3.62, 4.32]
+  };
+  const IDLE_FLIP = [0.5, 1.6];    // idle: the top leaf turns over in this window of each loop
+
+  function buildRig(svgText, label) {
+    const doc = new DOMParser().parseFromString(svgText, 'image/svg+xml');
+    if (doc.querySelector('parsererror') || doc.documentElement.nodeName !== 'svg') throw new Error('That file is not a valid SVG');
+    const holder = $('fx-art');
+    holder.replaceChildren();
+    const art = document.importNode(doc.documentElement, true);
+    if (!art.getAttribute('viewBox')) {
+      const w = parseFloat(art.getAttribute('width')) || 1000, h = parseFloat(art.getAttribute('height')) || 1000;
+      art.setAttribute('viewBox', `0 0 ${w} ${h}`);
+    }
+    set(art, { x: 165, y: 128, width: 670, height: 706, overflow: 'visible', preserveAspectRatio: 'xMidYMid meet' });
+    art.removeAttribute('style');
+    holder.appendChild(art);
+
+    const L = {};
+    for (const n of LAYERS) L[n] = findLayer(art, n);
+    const found = LAYERS.filter(n => L[n]), missing = LAYERS.filter(n => !L[n]);
+    const centreOf = el => { const b = stageBox(el); return { x: b.x + b.w / 2, y: b.y + b.h / 2, w: b.w, h: b.h, top: b.y, bottom: b.y + b.h, left: b.x, right: b.x + b.w }; };
+    const wrapAt = (el, stagePt) => { const w = wrap(el); return { w, p: toLocal(w, stagePt.x, stagePt.y) }; };
+    const vecLocal = (el, dx, dy) => { const a = toLocal(el, 0, 0), b = toLocal(el, dx, dy); return { x: b.x - a.x, y: b.y - a.y }; };
+    const kids = el => el ? [...el.children].filter(c => c.getBBox && c.getBBox().width + c.getBBox().height > 0) : [];
+
+    let badgeEl = L.badge;
+    if (!badgeEl) { badgeEl = make('g', {}); while (art.firstChild) badgeEl.appendChild(art.firstChild); art.appendChild(badgeEl); }
+    const anchor = L['medal-outline'] || L.medal || badgeEl;
+    const mc = centreOf(anchor);
+    const C = { x: mc.x, y: mc.y };
+    const k = Math.max(mc.w, mc.h) / 2 / 360;
+
+    // --- measure everything before wrapping changes the tree ---
+    const ribbonsInfo = ['ribbon-left', 'ribbon-right'].filter(n => L[n]).map(n => { const b = stageBox(L[n]); return { el: L[n], top: { x: b.x + b.w / 2, y: b.y }, side: n.endsWith('left') ? -1 : 1 }; });
+    const bookB = L.book ? centreOf(L.book) : null;
+    const clB = L['cover-left'] ? centreOf(L['cover-left']) : null, crB = L['cover-right'] ? centreOf(L['cover-right']) : null;
+    const gx = clB && crB ? (clB.x + crB.x) / 2 : (bookB ? bookB.x : C.x);          // gutter x (book is symmetric)
+    const coverPivot = crB ? { x: gx, y: crB.bottom - crB.h * 0.06 } : C;           // bottom of the gutter
+    const pageEls = [...kids(L['pages-left']).map((el, i) => ({ el, i, side: -1 })), ...kids(L['pages-right']).map((el, i) => ({ el, i, side: 1 }))];
+    const pageB = pageEls.map(p => centreOf(p.el));
+    const leafEls = kids(L.leaves), leafB = leafEls.map(centreOf);
+    const gutterTop = leafB[0] ? { x: gx, y: leafB[0].bottom - 6 * k } : (bookB ? { x: gx, y: bookB.y } : C);
+    const closedB = L['book-closed'] ? centreOf(L['book-closed']) : null;
+    const markB = L.bookmark ? centreOf(L.bookmark) : null;
+    const starB = L.star ? centreOf(L.star) : null;
+    const burstEls = kids(L.burst);
+    const starsInfo = L.sparkles ? kids(L.sparkles).map(el => ({ el, c: centreOf(el) })) : [];
+
+    // --- wrap ---
+    const badgeW = wrap(badgeEl);
+    badgeW.setAttribute('filter', 'url(#fx-drop)');
+    const badgePivot = toLocal(badgeW, C.x, C.y);
+    const pTo = toLocal(badgeW, C.x + mc.w, C.y + mc.h);
+    const bb = { width: Math.abs(pTo.x - badgePivot.x), height: Math.abs(pTo.y - badgePivot.y) };
+
+    const ribbons = ribbonsInfo.map(r => ({ ...wrapAt(r.el, r.top), side: r.side }));
+    // book: falls from above, lands on its spine (squash pivot at the bottom of the gutter)
+    let book = null;
+    if (L.book) {
+      const h = wrapAt(L.book, { x: gx, y: bookB.bottom });
+      book = { ...h, fall: vecLocal(h.w, 0, -170 * k) };
+    }
+    // closed book (hidden in the static art): drops in centred, then its front cover swings open about the spine
+    let closed = null;
+    if (L['book-closed']) {
+      const h = wrapAt(L['book-closed'], { x: gx, y: closedB.y });
+      L['book-closed'].setAttribute('opacity', 1);
+      closed = { ...h, shift: vecLocal(h.w, C.x - closedB.x, 0), front: L['closed-front'] ? wrapAt(L['closed-front'], { x: gx, y: closedB.y }) : null };
+    }
+    const spineW = L.spine ? wrapAt(L.spine, { x: gx, y: coverPivot.y }) : null;
+    const covers = ['cover-left', 'cover-right'].filter(n => L[n]).map(n => ({ ...wrapAt(L[n], coverPivot), side: n.endsWith('left') ? -1 : 1 }));
+    const pages = pageEls.map((p, j) => ({ ...wrapAt(p.el, { x: gx, y: pageB[j].bottom }), i: p.i, side: p.side }));
+    const leaves = leafEls.map((el, i) => {
+      const h = wrapAt(el, { x: gx, y: leafB[i].bottom });
+      // a shade copy of the leaf outline that darkens the page while it is edge-on
+      const src = el.querySelector('path');
+      let shade = null;
+      if (src) { shade = src.cloneNode(false); shade.removeAttribute('id'); set(shade, { fill: '#e0a050', stroke: 'none', opacity: 0 }); src.after(shade); }
+      return { ...h, i, shade, lift: vecLocal(h.w, 0, -26 * k) };
+    });
+    const bookmark = L.bookmark ? wrapAt(L.bookmark, { x: markB.x, y: markB.top }) : null;
+    let star = null;
+    if (L.star) {
+      const h = wrapAt(L.star, starB);
+      star = { ...h, from: vecLocal(h.w, gutterTop.x - starB.x, gutterTop.y - starB.y) };
+    }
+    const bursts = starB ? burstEls.map((el, i) => ({ ...wrapAt(el, starB), i })) : [];
+    const stars = starsInfo.map((s, i) => ({ ...wrapAt(s.el, s.c), i }));
+
+    // Shine sweep, masked to the medal
+    let shine = null;
+    {
+      const src = L.medal || anchor;
+      const defs = art.querySelector('defs') || make('defs', {}, art);
+      const mask = make('mask', { id: 'fx-shine-mask', maskUnits: 'userSpaceOnUse', x: -5000, y: -5000, width: 10000, height: 10000 }, defs);
+      const m = badgeW.getScreenCTM().inverse().multiply(src.parentNode.getScreenCTM());
+      const holderG = make('g', { transform: `matrix(${m.a} ${m.b} ${m.c} ${m.d} ${m.e} ${m.f})` }, mask);
+      const clone = src.cloneNode(true);
+      clone.removeAttribute('id'); clone.querySelectorAll('[id]').forEach(e => e.removeAttribute('id'));
+      [clone, ...clone.querySelectorAll('*')].forEach(e => { e.removeAttribute('filter'); e.style.fill = '#fff'; e.style.stroke = 'none'; e.style.opacity = 1; });
+      holderG.appendChild(clone);
+      const g = make('g', { mask: 'url(#fx-shine-mask)' }, badgeW);
+      const xfG = make('g', {}, g);
+      const band = make('g', { transform: 'rotate(35)' }, xfG);
+      const H = Math.max(bb.width, bb.height) * 2.2, w1 = bb.width * 0.16;
+      make('rect', { x: -w1 / 2, y: -H / 2, width: w1, height: H, fill: 'url(#fx-shine)', opacity: .28 }, band);
+      make('rect', { x: w1 * 0.66, y: -H / 2, width: w1 * 0.28, height: H, fill: 'url(#fx-shine)', opacity: .24 }, band);
+      shine = { xf: xfG, travel: bb.width * 0.85 };
+    }
+
+    // Rings, confetti, twinkles, glow
+    set($('fx-ringGold'), { cx: C.x, cy: C.y });
+    set($('fx-ringWhite'), { cx: C.x, cy: C.y });
+    set($('fx-glowDisc'), { cx: C.x, cy: C.y, r: 470 * k });
+    seed = 51;
+    const COLORS = ['#fde15e', '#ff7a12', '#ff5a52', '#a46bff', '#f6eaea', '#7a3cf0', '#fccb12'];
+    const cg = $('fx-confetti'); cg.replaceChildren();
+    const confetti = [];
+    for (let i = 0; i < 80; i++) {
+      const a = rnd() * TAU, sp = (380 + rnd() * 520) * k;
+      const isRect = rnd() < .7;
+      const el = isRect ? make('rect', {}, cg) : make('circle', {}, cg);
+      if (isRect) { const w = 6 + rnd() * 6, h = 14 + rnd() * 14; set(el, { x: -w / 2, y: -h / 2, width: w, height: h, rx: 2 }); }
+      else el.setAttribute('r', 3 + rnd() * 4);
+      el.setAttribute('fill', COLORS[i % COLORS.length]);
+      confetti.push({ el, a, sp, spin: (rnd() - .5) * 1400, r0: (250 + rnd() * 60) * k, delay: rnd() * .08, life: .9 + rnd() * .7 });
+    }
+    const tg = $('fx-twinkles'); tg.replaceChildren();
+    const twinkles = [
+      [150, 170, 15, 0.0, '#f6eaea'], [870, 600, 12, 1.1, '#fde15e'], [120, 600, 10, 2.3, '#ffb3a8'],
+      [900, 300, 9, 0.6, '#f6eaea'], [250, 930, 11, 3.0, '#fde15e'], [760, 930, 8, 1.7, '#f6eaea'],
+      [880, 110, 13, 2.7, '#fde15e'], [100, 380, 8, 3.5, '#f6eaea']
+    ].map(([x, y, s, ph, c]) => ({ el: make('use', { href: '#fx-star', fill: c }, tg), x: C.x + (x - 500) * k * .92, y: C.y + (y - 480) * k * .92, s, ph }));
+
+    rig = { L, badgeW, badgePivot, C, k, ribbons, book, closed, spineW, covers, pages, leaves, bookmark, star, bursts, stars, shine, confetti, twinkles };
+    buildRays(C, k);
+    CUES = buildCues(rig);
+    showStatus(`Loaded <b>${label}</b> · animating ${found.length}/${LAYERS.length} layers` + (missing.length ? ` · not found: ${missing.join(', ')}` : ''));
+    console.log('[badge] layers found:', found, 'missing:', missing, 'pages:', pages.length, 'leaves:', leaves.length, 'bursts:', bursts.length);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Light rays around the badge: soft golden beams that burst out on completion,
+  // then slowly turn and shimmer (long/short breathing). Everything repeats every
+  // 4 s (one beam-step of rotation), so the idle loop stays seamless.
+  // ---------------------------------------------------------------------------
+  const RAYS = { n: 16, start: 1.06, len: 0.3, swing: 0.22, wIn: 0.02, wOut: 0.032 };
+  let rays = null;
+  function buildRays(C, k) {
+    const g = $('fx-rays'); g.replaceChildren();
+    const R = 360 * k;
+    rays = { C, R, paths: Array.from({ length: RAYS.n }, () => make('path', { fill: 'url(#fx-ray)' }, g)) };
+  }
+  function renderRays(t, at) {
+    if (!rays) return;
+    const { C, R, paths } = rays, n = paths.length, step = 360 / n;
+    const q = prog(t, at, at + 0.7);
+    const grow = q === 0 ? 0 : easeOutBack(q, 1.7);
+    const fade = clamp(q * 3);
+    const turn = (t * step) / CONFIG.loop;                    // one beam-step per loop
+    const w = (Math.PI + TAU) / CONFIG.loop;                  // alternate long/short, swapping smoothly
+    paths.forEach((p, i) => {
+      if (fade <= 0) { p.setAttribute('opacity', 0); return; }
+      const breathe = 1 + RAYS.swing * Math.cos(i * Math.PI + w * t);
+      const a = R * lerp(0.92, RAYS.start, grow);
+      const b = a + R * RAYS.len * breathe * grow;
+      const wi = R * RAYS.wIn, wo = R * RAYS.wOut;
+      p.setAttribute('d', `M ${C.x + a} ${C.y - wi} L ${C.x + b} ${C.y - wo} Q ${C.x + b + wo} ${C.y} ${C.x + b} ${C.y + wo} L ${C.x + a} ${C.y + wi} Z`);
+      p.setAttribute('transform', `rotate(${i * step + turn - 90} ${C.x} ${C.y})`);
+      p.setAttribute('opacity', fade * (0.78 + 0.22 * Math.cos(i * Math.PI + w * t + 1.3)));
+    });
+  }
+
+  // ---------------------------------------------------------------------------
+  // Timeline: render(t) draws the exact frame for time t (seconds)
+  // ---------------------------------------------------------------------------
+  const pop = (t, at, dur = 0.45) => { const q = prog(t, at, at + dur); return q === 0 ? 0 : easeOutElastic(q) * 0.85 + 0.15 * easeOutCubic(q); };
+  const xf = (p, rot, sx, sy = sx) => `translate(${p.x} ${p.y}) rotate(${rot}) scale(${Math.abs(sx) < .001 ? .001 * (sx < 0 ? -1 : 1) : sx} ${Math.max(sy, .001)}) translate(${-p.x} ${-p.y})`;
+
+  // where a leaf is in its turn: -1 = lying on the right stack, +1 = lying on the left stack
+  function leafTurn(t, i, idleT) {
+    if (idleT > 0 && i === rig.leaves.length - 1) {
+      const lt = idleT % CONFIG.loop;
+      const q = prog(lt, IDLE_FLIP[0], IDLE_FLIP[1]);
+      return q > 0 && q < 1 ? { e: easeInOutCubic(q), on: true } : { e: 1, on: true };
+    }
+    const at = T.leaves[i] ?? T.leaves[T.leaves.length - 1] + 0.14 * (i - T.leaves.length + 1);
+    const q = prog(t, at, at + T.leafDur);
+    return { e: easeInOutCubic(q), on: t >= at };
+  }
+
+  function render(t) {
+    if (!rig) return;
+    const { badgeW, badgePivot: P, C, k } = rig;
+    const idleT = Math.max(0, t - CONFIG.intro);
+    const idleOn = clamp(idleT * 2);
+    const lt = idleT % CONFIG.loop;
+    const w = idleT * TAU / CONFIG.loop;
+    const st = t - T.impact;
+
+    // Medal pops in, squashes on completion
+    const kPop = prog(t, 0.0, 0.6);
+    const s = kPop === 0 ? 0.001 : easeOutElastic(kPop) * 0.9 + 0.1 * easeOutCubic(kPop);
+    const squash = st > 0 ? Math.exp(-st * 7) * Math.sin(st * 26) * 0.05 : 0;
+    const tilt = lerp(-10, 0, easeOutBack(kPop, 2.2));
+    set(badgeW, { transform: `translate(${P.x} ${P.y}) rotate(${tilt}) scale(${s * (1 + squash)} ${s * (1 - squash)}) translate(${-P.x} ${-P.y})`, opacity: clamp(kPop * 6) });
+    set($('fx-glowDisc'), { opacity: easeOutCubic(prog(t, .1, .9)) * (0.9 + 0.1 * Math.sin(t * TAU / 4)) });
+
+    // Ribbons drop and swing
+    for (const r of rig.ribbons) {
+      const q = prog(t, T.ribbons, T.ribbons + 0.7);
+      const sy = q === 0 ? 0.001 : easeOutBack(clamp(q * 1.6), 2.2);
+      const swing = q === 0 ? 0 : -r.side * 22 * Math.exp(-q * 5) * Math.cos(q * 11);
+      const sway = idleOn * r.side * 1.2 * Math.sin(idleT * TAU / 4 + (r.side > 0 ? 0.6 : 0));
+      set(r.w, { transform: xf(r.p, swing + sway, 1, sy) });
+    }
+
+    // Book: falls in shut, lands on its spine with a squash + bounce; breathes when idle
+    if (rig.book) {
+      const b = rig.book;
+      const q = prog(t, T.drop[0], T.drop[1]);
+      const fall = 1 - q * q;                                     // accelerates like a drop
+      const lt2 = t - T.drop[1];
+      const hop = lt2 > 0 && lt2 < 0.36 ? Math.sin(Math.PI * lt2 / 0.36) * 0.09 : 0;          // little bounce
+      const land = lt2 > 0 ? Math.exp(-lt2 * 9) * Math.cos(lt2 * 30) * 0.16 : 0;            // squash on landing
+      const openBump = (() => { const u = t - T.open[1]; return u > 0 ? Math.exp(-u * 8) * Math.sin(u * 24) * 0.03 : 0; })();
+      const bump = st > 0 ? Math.exp(-st * 6) * Math.sin(st * 22) * 0.04 : 0;
+      const breathe = 0.014 * Math.sin(w) * idleOn;
+      const sy = 1 - land + bump + breathe + openBump, sx = 1 + land * 0.6 - bump * 0.4 + breathe * 0.5;
+      const oy = b.fall.y * (fall + hop), ox = b.fall.x * (fall + hop);
+      set(b.w, { transform: `translate(${ox} ${oy}) ${xf(b.p, (1 - easeOutCubic(q)) * -8, sx, sy)}`, opacity: clamp(q * 3) });
+    }
+
+    // Closed book: slides so its spine sits on the gutter while the front cover swings open (scaleX → 0 about the spine)
+    const open = t >= T.swap;
+    if (rig.closed) {
+      const c = rig.closed, q = prog(t, T.open[0], T.swap);
+      const m = 1 - easeInOutCubic(q);
+      const big = lerp(1, 1.15, m);   // the shut book reads a touch bigger, settles to true size as it opens
+      set(c.w, { transform: `translate(${c.shift.x * m} ${c.shift.y * m}) ${xf(c.p, 0, big)}`, opacity: 1 - prog(t, T.swap, T.swap + 0.12) });
+      if (c.front) set(c.front.w, { transform: xf(c.front.p, 0, 1 - q * q, 1), opacity: open ? 0 : 1 });
+    }
+    if (rig.spineW) set(rig.spineW.w, { opacity: open || !rig.closed ? 1 : 0 });
+
+    // Open covers: the front cover keeps swinging over to the left (scaleX 0 → 1), the back cover settles flat
+    for (const c of rig.covers) {
+      const q = prog(t, T.swap, T.open[1] + 0.08);
+      const vis = open || !rig.closed;
+      if (c.side < 0) set(c.w, { transform: xf(c.p, 0, q === 0 ? 0.001 : easeOutBack(q, 1.6), 1), opacity: vis ? 1 : 0 });
+      else set(c.w, { transform: xf(c.p, 0, 1, 1 + 0.05 * Math.sin(Math.PI * q)), opacity: vis ? 1 : 0 });
+    }
+
+    // Page layers fan up out of the gutter, back to front, both sides together
+    for (const pg of rig.pages) {
+      const at = T.pages + pg.i * T.pageGap;
+      const q = prog(t, at, at + T.pageGrow);
+      const sy = q === 0 ? 0.001 : easeOutBack(q, 1.8);
+      const sx = q === 0 ? 0.001 : lerp(0.2, 1, easeOutCubic(q));
+      const fan = -pg.side * 14 * (1 - easeOutCubic(q));
+      set(pg.w, { transform: xf(pg.p, fan, sx, sy), opacity: q > 0 ? 1 : 0 });
+    }
+
+    // Loose leaves flip from the right stack to the left one; the top leaf turns again every idle loop
+    rig.leaves.forEach((lf, i) => {
+      const { e, on } = leafTurn(t, i, idleT);
+      const sx = -Math.cos(Math.PI * e);                       // -1 (right) → +1 (left)
+      const arc = Math.sin(Math.PI * e);
+      const lift = { x: lf.lift.x * arc, y: lf.lift.y * arc };
+      set(lf.w, { transform: `translate(${lift.x} ${lift.y}) ${xf(lf.p, 0, sx, 1 + 0.16 * arc)}`, opacity: on ? 1 : 0 });
+      if (lf.shade) lf.shade.setAttribute('opacity', 0.32 * Math.pow(arc, 4));
+    });
+
+    // Bookmark ribbon unfurls down from where it leaves the pages, swings and settles
+    if (rig.bookmark) {
+      const q = prog(t, T.bookmark[0], T.bookmark[1]);
+      const sy = q === 0 ? 0.001 : easeOutBack(q, 2.2);
+      const swing = q === 0 ? 0 : 14 * Math.exp(-q * 4) * Math.sin(q * 13);
+      const sway = 1.8 * Math.sin(w + 0.8) * idleOn;
+      set(rig.bookmark.w, { transform: xf(rig.bookmark.p, swing + sway, 1, sy), opacity: q > 0 ? 1 : 0 });
+    }
+
+    // Star rises out of the book, spins into place; twinkles when idle
+    if (rig.star) {
+      const sr = rig.star;
+      const q = prog(t, T.star[0], T.star[1]);
+      const e = easeOutBack(q, 1.6);
+      const ox = sr.from.x * (1 - e), oy = sr.from.y * (1 - e);
+      const sc = q === 0 ? 0.001 : lerp(0.25, 1, easeOutBack(q, 2.4));
+      const ping = (() => { const u = t - T.star[1]; return u > 0 && u < 0.3 ? 0.18 * Math.sin(Math.PI * u / 0.3) : 0; })();
+      const tw = 1 + (0.1 * Math.sin(2 * w) + 0.04 * Math.sin(4 * w + 1)) * idleOn;
+      set(sr.w, { transform: `translate(${ox} ${oy}) ${xf(sr.p, lerp(-200, 0, easeOutCubic(q)) + 7 * Math.sin(w) * idleOn, sc * (1 + ping) * tw)}`, opacity: q > 0 ? 1 : 0 });
+    }
+
+    // Burst dashes shoot out from the star, then pulse with its twinkle
+    for (const b of rig.bursts) {
+      const sc = pop(t, T.burst + b.i * 0.05, 0.5);
+      const pulse = 1 + 0.08 * Math.sin(2 * w - 0.6) * idleOn;
+      set(b.w, { transform: xf(b.p, 0, sc * pulse), opacity: sc > 0 ? 1 : 0 });
+    }
+
+    // Sparkle stars burst in, then twinkle
+    for (const sp of rig.stars) {
+      const at = T.stars + sp.i * 0.1;
+      const sc = pop(t, at, 0.5);
+      const tw = idleT > 0 ? 1 + 0.25 * Math.sin(idleT * TAU / 2 + sp.i * 2.1) * idleOn : 1;
+      set(sp.w, { transform: xf(sp.p, lerp(-90, 0, easeOutCubic(prog(t, at, at + .5))), sc * tw) });
+    }
+
+    // Shockwave rings
+    const kG = prog(t, T.impact, T.impact + .7), kW = prog(t, T.impact + .12, T.impact + .95);
+    set($('fx-ringGold'), { r: lerp(330, 520, easeOutCubic(kG)) * k, 'stroke-width': lerp(16, 1, kG), opacity: kG > 0 && kG < 1 ? 1 - kG : 0 });
+    set($('fx-ringWhite'), { r: lerp(330, 560, easeOutCubic(kW)) * k, 'stroke-width': lerp(8, 1, kW), opacity: kW > 0 && kW < 1 ? (1 - kW) * 0.8 : 0 });
+
+    // Confetti
+    for (const p of rig.confetti) {
+      const ltc = t - T.impact - 0.03 - p.delay;
+      if (ltc <= 0 || ltc > p.life) { p.el.setAttribute('opacity', 0); continue; }
+      const d = p.r0 + p.sp * (1 - Math.exp(-ltc * 3.2)) / 3.2;
+      const x = C.x + Math.cos(p.a) * d, y = C.y + Math.sin(p.a) * d + 140 * k * ltc * ltc;
+      const sc = 1 - Math.pow(ltc / p.life, 3);
+      set(p.el, { transform: `translate(${x} ${y}) rotate(${p.a * DEG + p.spin * ltc}) scale(${sc} ${sc * Math.abs(Math.cos(ltc * 9 + p.a))})`, opacity: 1 });
+    }
+
+    // Twinkles around the badge
+    const twIn = clamp(prog(t, T.impact + .45, T.impact + 1.15));
+    for (const s2 of rig.twinkles) {
+      const w = Math.pow(Math.max(0, Math.sin((t + s2.ph) * TAU / 4)), 3) * twIn;
+      set(s2.el, { transform: `translate(${s2.x} ${s2.y}) rotate(${t * 90 / CONFIG.loop}) scale(${Math.max(s2.s * w, 0.001)})`, opacity: w });
+    }
+
+    renderRays(t, T.impact);
+
+    // Shine sweep: once in the intro, then once per loop
+    if (rig.shine) {
+      const ph = t < CONFIG.intro ? prog(t, T.shine[0], T.shine[1]) : prog(lt, 2.6, 3.3);
+      const x = lerp(-rig.shine.travel, rig.shine.travel, easeInOutCubic(ph));
+      set(rig.shine.xf, { transform: `translate(${P.x + x} ${P.y})`, opacity: ph > 0 && ph < 1 ? 1 : 0 });
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Cue sheet: sound + haptics, on the same timeline as render(t)
+  // ---------------------------------------------------------------------------
+  let CUES = [];
+  function buildCues(r) {
+    const cues = [
+      { t: 0.02, sound: 'pop', haptic: [{ t: 0, type: 'transient', i: 0.55, s: 0.4 }] },
+      { t: T.ribbons + 0.05, sound: 'flap', haptic: [{ t: 0, type: 'transient', i: 0.25, s: 0.3 }] },
+    ];
+    if (r.book) cues.push({ t: T.drop[1], sound: 'thump', haptic: [{ t: 0, type: 'transient', i: 0.8, s: 0.25 }, { t: 0.2, type: 'transient', i: 0.3, s: 0.2 }] });
+    if (r.covers.length) cues.push({ t: T.open[0] + 0.06, sound: 'open', d: T.open[1] - T.open[0], haptic: [{ t: 0, type: 'continuous', d: 0.26, i: 0.2, s: 0.2, ramp: [0.4, 1] }, { t: 0.3, type: 'transient', i: 0.45, s: 0.4 }] });
+    if (r.pages.length) cues.push({ t: T.pages + 0.04, sound: 'fan', d: T.pageGrow + 0.12 });
+    const flipNotes = [72, 76, 79, 84, 88, 91];
+    r.leaves.forEach((lf, i) => cues.push({ t: (T.leaves[i] ?? 2) + T.leafDur * 0.42, sound: 'flip', note: flipNotes[i % flipNotes.length], pan: 0.5 - i * 0.3,
+      haptic: [{ t: 0, type: 'transient', i: 0.28 + i * 0.05, s: 0.75 }] }));
+    if (r.bookmark) cues.push({ t: T.bookmark[0] + 0.02, sound: 'unfurl', d: T.bookmark[1] - T.bookmark[0], haptic: [{ t: 0.22, type: 'transient', i: 0.35, s: 0.4 }] });
+    if (r.star) cues.push({ t: T.star[0] + 0.04, sound: 'rise', d: T.star[1] - T.star[0] - 0.08 },
+      { t: T.star[1] - 0.04, sound: 'ding', haptic: [{ t: 0, type: 'transient', i: 0.7, s: 1 }] });
+    cues.push(
+      { t: T.impact, sound: 'tada', haptic: [{ t: 0, type: 'transient', i: 1, s: 0.65 }] },
+      { t: T.impact + 0.03, sound: 'confetti', haptic: [0.05, 0.12, 0.2, 0.29, 0.4].map((dt, j) => ({ t: dt, type: 'transient', i: 0.38 - 0.05 * j, s: 0.9 })) },
+      { t: T.stars, sound: 'sparkle' },
+      { t: T.shine[0], sound: 'shine', d: 0.7 }
+    );
+    return cues.sort((a, b) => a.t - b.t);
+  }
+  const IDLE_CUES = [
+    { at: IDLE_FLIP[0] + (IDLE_FLIP[1] - IDLE_FLIP[0]) * 0.45, sound: 'flip', note: 84, pan: 0, v: 0.45 },
+    { at: 2.6, sound: 'shine', d: 0.7, v: 0.55 }
+  ];
+
+  function cuesBetween(a, b) {
+    const out = CUES.filter(c => c.t >= a && c.t < b);
+    for (const ic of IDLE_CUES) {
+      for (let k = Math.max(0, Math.floor((a - CONFIG.intro - ic.at) / CONFIG.loop)); ; k++) {
+        const t = CONFIG.intro + ic.at + k * CONFIG.loop;
+        if (t >= b) break;
+        if (t >= a) out.push({ ...ic, t });
+      }
+    }
+    return out.sort((x, y) => x.t - y.t);
+  }
+  // ---------------------------------------------------------------------------
+  // Sound: synthesised with Web Audio (no audio files), deterministic for export
+  // ---------------------------------------------------------------------------
+  function createSynth(ctx) {
+    let sd = 99;
+    const r = () => (sd = (sd * 16807) % 2147483647, (sd - 1) / 2147483646);
+    const out = ctx.createGain(); out.gain.value = 0.85;
+    const comp = ctx.createDynamicsCompressor();
+    comp.threshold.value = -16; comp.knee.value = 8; comp.ratio.value = 4; comp.attack.value = 0.003; comp.release.value = 0.25;
+    out.connect(comp); comp.connect(ctx.destination);
+
+    // Small room reverb from decaying noise
+    const ir = ctx.createBuffer(2, Math.round(ctx.sampleRate * 1.6), ctx.sampleRate);
+    for (let ch = 0; ch < 2; ch++) { const d = ir.getChannelData(ch); for (let i = 0; i < d.length; i++) d[i] = (r() * 2 - 1) * Math.pow(1 - i / d.length, 3); }
+    const verb = ctx.createConvolver(); verb.buffer = ir;
+    const wet = ctx.createGain(); wet.gain.value = 0.18; verb.connect(wet); wet.connect(out);
+    const nb = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate);
+    { const d = nb.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = r() * 2 - 1; }
+
+    const voice = (pan = 0, send = 0.4) => {
+      const g = ctx.createGain(); g.gain.value = 0;
+      const p = ctx.createStereoPanner(); p.pan.value = pan;
+      g.connect(p); p.connect(out);
+      if (send) { const s = ctx.createGain(); s.gain.value = send; p.connect(s); s.connect(verb); }
+      return { g, p };
+    };
+    const env = (param, t, peak, a, d) => { param.setValueAtTime(0, t); param.linearRampToValueAtTime(peak, t + a); param.exponentialRampToValueAtTime(0.0001, t + a + d); };
+    const osc = (type, f, t, stop) => { const o = ctx.createOscillator(); o.type = type; o.frequency.setValueAtTime(f, t); o.start(t); o.stop(stop); return o; };
+    const noise = (t, stop) => { const n = ctx.createBufferSource(); n.buffer = nb; n.loop = true; n.start(t, r() * 1.5); n.stop(stop); return n; };
+    const filt = (type, f, q = 0.7) => { const b = ctx.createBiquadFilter(); b.type = type; b.frequency.value = f; b.Q.value = q; return b; };
+    const swell = (param, t, d, peak, at = 0.7) => { param.setValueAtTime(0, t); param.linearRampToValueAtTime(peak, t + d * at); param.exponentialRampToValueAtTime(0.0001, t + d + 0.12); };
+
+    // Musical, Duolingo-style palette: woody marimba, bright bells, major key (C), no harsh noise
+    const N = n => 440 * Math.pow(2, (n - 69) / 12);                        // MIDI note → Hz
+    const C4 = 60, C5 = 72, D5 = 74, E5 = 76, G5 = 79, A5 = 81, C6 = 84, D6 = 86, E6 = 88, G6 = 91, A6 = 93, C7 = 96, E7 = 100;
+    // marimba: sine body + fast-decaying 4x and 10x overtones (the woody "tok")
+    const marimba = (t, note, v = 1, pan = 0, bend = 0) => {
+      const f = N(note), a = voice(pan, .35);
+      const o = osc('sine', f * (1 + bend), t, t + .9); o.frequency.exponentialRampToValueAtTime(f, t + .05);
+      o.connect(a.g); env(a.g.gain, t, .42 * v, .003, .5);
+      const b = voice(pan, .2), o2 = osc('sine', f * 4, t, t + .2); o2.connect(b.g); env(b.g.gain, t, .1 * v, .002, .06);
+      const c = voice(pan, 0), o3 = osc('sine', f * 9.9, t, t + .08); o3.connect(c.g); env(c.g.gain, t, .04 * v, .001, .02);
+    };
+    // bell: inharmonic partials, long shimmering tail
+    const bell = (t, note, v = 1, pan = 0, len = 1.2) => {
+      [[1, .2], [2.76, .07], [5.4, .035], [8.93, .015]].forEach(([m, g], j) => {
+        const a = voice(pan, .8), o = osc('sine', N(note) * m, t, t + len + .2);
+        o.connect(a.g); env(a.g.gain, t, g * v, .002, len / (1 + j * .9));
+      });
+    };
+    // pluck: bright, short (confetti twinkles, harp)
+    const pluck = (t, note, v = 1, pan = 0) => {
+      const a = voice(pan, .7), o = osc('triangle', N(note), t, t + .5); o.connect(a.g); env(a.g.gain, t, .1 * v, .002, .22);
+      const b = voice(pan, .7), o2 = osc('sine', N(note) * 2, t, t + .3); o2.connect(b.g); env(b.g.gain, t, .05 * v, .002, .1);
+    };
+
+    const S = {
+      // medal appears: bouncy "boop"
+      pop(t, d, v) { marimba(t, G5, 1.1 * v, 0, -.25); marimba(t, C5, .5 * v, 0, -.2); },
+      // ribbons drop: soft low double flap
+      flap(t) { marimba(t, C4 + 7, .5, -.4, -.15); marimba(t + .07, C5, .45, .4, -.15); },
+      // book lands: soft woody thump (low marimba + gentle kick), little bounce knock after
+      thump(t) {
+        const kk = voice(0, .08), o = osc('sine', 150, t, t + .3);
+        o.frequency.exponentialRampToValueAtTime(60, t + .1); o.connect(kk.g); env(kk.g.gain, t, .45, .002, .14);
+        marimba(t, C4, .9, 0, -.3); marimba(t + .01, C4 + 7, .45, 0, -.25);
+        marimba(t + .2, C5, .35, 0, -.15);
+      },
+      // covers swing open: two woody notes spreading left / right, a soft rising breath between
+      open(t, d) {
+        marimba(t, E5, .5, -.6, -.1); marimba(t + .05, G5, .5, .6, -.1);
+        const a = voice(0, .5), o = osc('sine', N(C5), t, t + d + .1);
+        o.frequency.exponentialRampToValueAtTime(N(C6), t + d * .8); o.connect(a.g);
+        swell(a.g.gain, t, d * .8, .045, .6);
+        marimba(t + d * .8, C6, .45, 0, -.1);
+      },
+      // page layers fan up: airy soft rising shimmer of plucks
+      fan(t, d) { [G5, C6, E6].forEach((n, j) => pluck(t + j * d * .22, n, .32, -.4 + j * .4)); },
+      // one page flips: a soft paper "fff" (gentle filtered noise) + a quick soft pluck, rising each page
+      flip(t, d, v, cue) {
+        const pan = cue.pan ?? 0, n = noise(t, t + .14), bp = filt('bandpass', 2600, 1.2), a = voice(pan, .2);
+        n.connect(bp); bp.connect(a.g); env(a.g.gain, t, .05 * v, .02, .07);
+        pluck(t + .03, cue.note, .85 * v, pan); marimba(t + .03, cue.note, .25 * v, pan, -.05);
+      },
+      // bookmark unfurls: a quick downward slide landing on a soft woody tok
+      unfurl(t, d) {
+        const a = voice(.5, .4), o = osc('triangle', N(G6), t, t + d * .6);
+        o.frequency.exponentialRampToValueAtTime(N(G5), t + d * .45); o.connect(a.g);
+        a.g.gain.setValueAtTime(0, t); a.g.gain.linearRampToValueAtTime(.04, t + d * .15); a.g.gain.linearRampToValueAtTime(0, t + d * .5);
+        marimba(t + d * .45, G5, .55, .5, -.12);
+      },
+      // star rises out of the book: soft rising glide
+      rise(t, d) {
+        const a = voice(0, .6), o = osc('sine', N(C6), t, t + d + .1);
+        o.frequency.exponentialRampToValueAtTime(N(C7), t + d); o.connect(a.g);
+        swell(a.g.gain, t, d, .05, .8);
+      },
+      // star appears: gentle bell "ding"
+      ding(t) { bell(t, C7, .75, 0, 1.4); bell(t + .04, G6, .35, -.2, 1.1); bell(t + .09, E7, .2, .3, .8); },
+      // complete: "ta-da!" chord with a bell on top and a soft kick
+      tada(t) {
+        const kk = voice(0, .1), o = osc('sine', 120, t, t + .3);
+        o.frequency.exponentialRampToValueAtTime(55, t + .12); o.connect(kk.g); env(kk.g.gain, t, .5, .002, .16);
+        [C5, E5, G5].forEach((n, j) => marimba(t + j * .012, n, .75, -.3 + j * .3));
+        marimba(t + .11, C6, .9, .2);
+        bell(t + .11, E6, .9, .25, 1.4);
+        bell(t + .11, G6, .5, -.2, 1.2);
+      },
+      sparkle(t) { [E7, C7 + 7].forEach((n, j) => bell(t + j * .1, n, .35, -.4 + j * .8, .6)); },
+      confetti(t) {
+        const notes = [C6, D6, E6, G6, A6, C7, E7];
+        for (let j = 0; j < 12; j++) {
+          const kq = j / 12, at = t + .15 + Math.pow(r(), 1.3) * .8;
+          pluck(at, notes[Math.floor(r() * notes.length)], .7 * (1 - kq * .6), r() * 1.4 - .7);
+        }
+      },
+      shine(t, d, v) { [C6, D6, E6, G6, A6, C7].forEach((n, j) => pluck(t + .06 + j * d * .09, n, .8 * v, -.5 + j * .2)); }
+    };
+    return { out, play(cue, at) { S[cue.sound]?.(Math.max(at, 0), cue.d ?? .6, cue.v ?? 1, cue); } };
+  }
+
+              // Offline render for video export: returns a 16-bit stereo WAV (base64).
+  // keepFrom lets the idle loop include reverb tails from the previous loop, so it loops seamlessly.
+  window.renderAudio = async (from, to, keepFrom = from, sr = 48000) => {
+    const ctx = new OfflineAudioContext(2, Math.ceil((to - from) * sr), sr);
+    const syn = createSynth(ctx);
+    for (const c of cuesBetween(from, to)) syn.play(c, c.t - from);
+    const buf = await ctx.startRendering();
+    const start = Math.round((keepFrom - from) * sr), n = buf.length - start;
+    const L = buf.getChannelData(0), R = buf.getChannelData(1);
+    const bytes = new Uint8Array(44 + n * 4), dv = new DataView(bytes.buffer);
+    const str = (o, s) => [...s].forEach((ch, i) => dv.setUint8(o + i, ch.charCodeAt(0)));
+    str(0, 'RIFF'); dv.setUint32(4, 36 + n * 4, true); str(8, 'WAVEfmt '); dv.setUint32(16, 16, true);
+    dv.setUint16(20, 1, true); dv.setUint16(22, 2, true); dv.setUint32(24, sr, true); dv.setUint32(28, sr * 4, true);
+    dv.setUint16(32, 4, true); dv.setUint16(34, 16, true); str(36, 'data'); dv.setUint32(40, n * 4, true);
+    for (let i = 0; i < n; i++) {
+      dv.setInt16(44 + i * 4, clamp(L[start + i], -1, 1) * 32767, true);
+      dv.setInt16(46 + i * 4, clamp(R[start + i], -1, 1) * 32767, true);
+    }
+    let bin = ''; for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+    return btoa(bin);
+  };
+
+  // ---------------------------------------------------------------------------
+  // Haptics: one cue sheet → iOS Core Haptics (AHAP), Android waveform, web vibrate
+  // ---------------------------------------------------------------------------
+  function hapticEvents() {
+    const ev = [];
+    for (const c of CUES) for (const h of c.haptic || []) ev.push({ ...h, t: +(c.t + h.t).toFixed(3) });
+    return ev.sort((a, b) => a.t - b.t);
+  }
+  function hapticEnvelope(step = 10) {          // amplitude 0..255 every `step` ms
+    const ev = hapticEvents();
+    const end = Math.max(...ev.map(e => e.t + (e.d || 0.05))) + 0.05;
+    const amp = new Array(Math.ceil(end * 1000 / step)).fill(0);
+    for (const e of ev) {
+      const i0 = Math.round(e.t * 1000 / step);
+      if (e.type === 'transient') {
+        const len = Math.max(1, Math.round(lerp(40, 12, e.s) / step));
+        for (let i = 0; i < len; i++) amp[i0 + i] = Math.max(amp[i0 + i], Math.round(e.i * 255));
+      } else {
+        const len = Math.round(e.d * 1000 / step), [r0, r1] = e.ramp || [1, 1];
+        for (let i = 0; i < len; i++) amp[i0 + i] = Math.max(amp[i0 + i], Math.round(e.i * lerp(r0, r1, i / len) * 255));
+      }
+    }
+    return { step, amp };
+  }
+  window.badgeHaptics = (audioFile) => {
+    const ev = hapticEvents();
+    const P = (id, v) => ({ ParameterID: id, ParameterValue: +v.toFixed(3) });
+    const pattern = [];
+    if (audioFile) pattern.push({ Event: { Time: 0, EventType: 'AudioCustom', EventWaveformPath: audioFile, EventParameters: [P('AudioVolume', 1)] } });
+    for (const e of ev) {
+      if (e.type === 'transient') pattern.push({ Event: { Time: e.t, EventType: 'HapticTransient', EventParameters: [P('HapticIntensity', e.i), P('HapticSharpness', e.s)] } });
+      else {
+        pattern.push({ Event: { Time: e.t, EventType: 'HapticContinuous', EventDuration: e.d, EventParameters: [P('HapticIntensity', e.i), P('HapticSharpness', e.s)] } });
+        if (e.ramp) pattern.push({ ParameterCurve: { ParameterID: 'HapticIntensityControl', Time: e.t, ParameterCurveControlPoints: [{ Time: 0, ParameterValue: e.ramp[0] }, { Time: e.d, ParameterValue: e.ramp[1] }] } });
+      }
+    }
+    const ahap = { Version: 1.0, Metadata: { Project: document.title, Created: 'cue sheet in ' + location.pathname.split('/').pop() }, Pattern: pattern };
+
+    // Android: run-length encode the amplitude envelope
+    const { step, amp } = hapticEnvelope();
+    const timings = [], amplitudes = [];
+    for (const a of amp) {
+      if (amplitudes.length && amplitudes[amplitudes.length - 1] === a) timings[timings.length - 1] += step;
+      else { timings.push(step); amplitudes.push(a); }
+    }
+    return { events: ev, ahap, android: { timings, amplitudes }, web: webPattern() };
+  };
+  // Web Vibration API has no intensity: taps become a solid buzz (longer = stronger),
+  // continuous rumbles are pulsed (PWM over 40ms windows) so they feel softer than the hits
+  function webPattern(step = 10) {
+    const ev = hapticEvents();
+    const end = Math.max(...ev.map(e => e.t + (e.d || 0.05))) + 0.05;
+    const on = new Array(Math.ceil(end * 1000 / step)).fill(false);
+    for (const e of ev) {
+      const i0 = Math.round(e.t * 1000 / step);
+      if (e.type === 'transient') {
+        const len = Math.max(1, Math.round(lerp(12, 45, e.i) / step));
+        for (let i = 0; i < len; i++) on[i0 + i] = true;
+      } else {
+        const len = Math.round(e.d * 1000 / step), [r0, r1] = e.ramp || [1, 1];
+        for (let i = 0; i < len; i++) if (((i0 + i) % 4) < Math.max(1, Math.round(e.i * lerp(r0, r1, i / len) * 4))) on[i0 + i] = true;
+      }
+    }
+    const pat = [];
+    let cur = true, run = 0;
+    for (const o of on) { if (o === cur) run += step; else { pat.push(run); cur = o; run = step; } }
+    pat.push(run);
+    return pat;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Loading, live reload, drag & drop, playback
+  // ---------------------------------------------------------------------------
+  let statusTimer;
+  function showStatus(html, ms = 5000) {
+    const el = $('status'); el.innerHTML = html; el.classList.add('on');
+    clearTimeout(statusTimer); statusTimer = setTimeout(() => el.classList.remove('on'), ms);
+  }
+
+  let start = performance.now();
+  let audio = null, synth = null, scheduledUntil = 0;
+  const pref = (k, d) => { try { const v = localStorage.getItem(k); return v === null ? d : v === '1'; } catch { return d; } };
+  const savePref = (k, v) => { try { localStorage.setItem(k, v ? '1' : '0'); } catch {} };
+  let soundOn = pref('badge.sound', true), hapticsOn = pref('badge.haptics', true);
+  const canVibrate = 'vibrate' in navigator;
+
+  function restart(fromGesture) {
+    start = performance.now();
+    scheduledUntil = 0;
+    if (synth) { const g = synth.out.gain; g.cancelScheduledValues(audio.currentTime); g.setTargetAtTime(0, audio.currentTime, 0.02); synth = null; }
+    if (soundOn && (audio || fromGesture)) {
+      audio = audio || new (window.AudioContext || window.webkitAudioContext)();
+      audio.resume();
+      synth = createSynth(audio);
+    }
+    if (canVibrate) navigator.vibrate(0);
+    if (hapticsOn && canVibrate && fromGesture) navigator.vibrate(webPattern());
+  }
+
+  // Schedule sounds slightly ahead of the playhead (elapsed = unwrapped seconds since restart)
+  function scheduleSound(elapsed) {
+    if (!synth) return;
+    const until = elapsed + 0.15;
+    for (const c of cuesBetween(scheduledUntil, until)) synth.play(c, audio.currentTime + (c.t - elapsed));
+    scheduledUntil = until;
+  }
+
+  const btnSound = $('btnSound'), btnHaptics = $('btnHaptics');
+  const syncButtons = () => {
+    btnSound.textContent = soundOn ? 'Sound on' : 'Sound off'; btnSound.setAttribute('aria-pressed', soundOn);
+    btnHaptics.textContent = hapticsOn ? 'Haptics on' : 'Haptics off'; btnHaptics.setAttribute('aria-pressed', hapticsOn);
+    btnHaptics.hidden = !canVibrate;
+  };
+  btnSound.addEventListener('click', () => { soundOn = !soundOn; savePref('badge.sound', soundOn); syncButtons(); restart(true); });
+  btnHaptics.addEventListener('click', () => { hapticsOn = !hapticsOn; savePref('badge.haptics', hapticsOn); syncButtons(); restart(true); });
+  syncButtons();
+  setTimeout(() => { if (!synth && soundOn) showStatus('Click the badge to replay with sound' + (canVibrate ? ' and haptics' : ''), 6000); }, 2500);
+
+  // Measuring needs real layout: wait while the page is hidden or has no size yet
+  const sized = () => new Promise(res => {
+    const ok = () => stageSvg.getBoundingClientRect().width > 10;
+    if (ok()) return res();
+    const ro = new ResizeObserver(() => { if (ok()) { ro.disconnect(); res(); } });
+    ro.observe(stageSvg);
+  });
+
+  async function loadFromServer() {
+    const res = await fetch(CONFIG.svg + '?v=' + Date.now(), { cache: 'no-store' });
+    if (!res.ok) throw new Error(`Couldn't load ${CONFIG.svg} (${res.status})`);
+    const text = await res.text();
+    await sized();
+    buildRig(text, CONFIG.svg);
+  }
+
+  window.render = render;
+  window.ready = (async () => {
+    try { await loadFromServer(); }
+    catch (e) {
+      showStatus(location.protocol === 'file:'
+        ? 'Open this through the studio (<b>node studio.mjs</b>) or drag an SVG onto this window.'
+        : 'Error: ' + e.message, 60000);
+    }
+  })();
+
+  if (params.has('capture')) { document.body.classList.add('capture'); return; }
+  if (params.has('embed')) document.body.classList.add('embed');
+
+  // Live reload: the studio server pings us whenever an .svg in this folder is saved
+  if (location.protocol.startsWith('http') && window.EventSource && /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname)) {
+    const es = new EventSource('/__events');
+    es.onmessage = async () => { try { await loadFromServer(); restart(); } catch (e) { showStatus('Error: ' + e.message); } };
+  }
+
+  // Drag & drop any SVG onto the window to animate it right away
+  addEventListener('dragover', e => { e.preventDefault(); document.body.classList.add('drag'); });
+  addEventListener('dragleave', () => document.body.classList.remove('drag'));
+  addEventListener('drop', async e => {
+    e.preventDefault(); document.body.classList.remove('drag');
+    const f = e.dataTransfer.files[0]; if (!f) return;
+    try { const text = await f.text(); await sized(); buildRig(text, f.name); restart(true); } catch (err) { showStatus('Error: ' + err.message); }
+  });
+
+  const total = CONFIG.intro + CONFIG.loop;
+  const loop = now => {
+    const elapsed = (now - start) / 1000;
+    let t = elapsed;
+    if (t > total) t = CONFIG.intro + ((t - CONFIG.intro) % CONFIG.loop);
+    render(t);
+    scheduleSound(elapsed);
+    requestAnimationFrame(loop);
+  };
+  requestAnimationFrame(loop);
+  stageSvg.addEventListener('click', () => restart(true));
+  window.badgeReplay = () => restart(true);   // used by the showcase site
+})();
+</script>
+</body>
+</html>

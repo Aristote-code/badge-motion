@@ -1,0 +1,12 @@
+{
+  "name": "spelling-wizard-badge",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "studio": "node studio.mjs",
+    "render": "node render.mjs"
+  },
+  "dependencies": {
+    "playwright-core": "1.58.2"
+  }
+}

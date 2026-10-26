@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Code Cracker badge (combination padlock), source artwork. Same workflow as the other badges.
+  The artwork is the FINAL state: dials on circle / star / triangle, shackle lifted + swung open.
+  Layer names the animation uses:
+    badge, medal, ribbon-left, ribbon-right, sparkles (star-1, star-2),
+    padlock (pops in; recoils on unlock), lock-top (+ hole-left, hole-right: the shackle pivots in hole-left),
+    shackle (starts locked = lowered + un-swung, springs up and swings open), lock-body, dial-window,
+    dials (dial-1..3; each has dial-N-drum + dial-N-reel whose children are the drum slots in order
+    around the cylinder: symbol, tick, symbol, tick... – the one at the drum centre is the answer),
+    dial-glow (behind the star), bursts (burst-1.. pop out at the finale)
+-->
+<svg xmlns="http://www.w3.org/2000/svg" width="840" height="960" viewBox="0 0 840 960" fill="none">
+<defs>
+  <linearGradient id="ring-fill" x1="0.2" y1="0" x2="0.8" y2="1"><stop stop-color="#1d8bfe"/><stop offset="0.5" stop-color="#006bfd"/><stop offset="1" stop-color="#1d8bfe"/></linearGradient>
+  <radialGradient id="inner-fill" cx="0.4" cy="0.3" r="0.8"><stop stop-color="#231277"/><stop offset="1" stop-color="#14074f"/></radialGradient>
+  <linearGradient id="gold-fill" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#fef058"/><stop offset="1" stop-color="#fccb12"/></linearGradient>
+  <linearGradient id="gold-deep" x1="0.2" y1="0" x2="0.8" y2="1"><stop stop-color="#fee05a"/><stop offset="0.6" stop-color="#fcc513"/><stop offset="1" stop-color="#f59204"/></linearGradient>
+  <filter id="star-glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="6"/></filter>
+  <linearGradient id="body-fill" x1="0.15" y1="0" x2="0.5" y2="1"><stop stop-color="#fef058"/><stop offset="0.55" stop-color="#fde03a"/><stop offset="1" stop-color="#fcb812"/></linearGradient>
+  <linearGradient id="top-fill" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#fef7a0"/><stop offset="0.5" stop-color="#fde15e"/><stop offset="1" stop-color="#fcc513"/></linearGradient>
+  <linearGradient id="drum-shade" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#06033a" stop-opacity="0.6"/><stop offset="0.22" stop-color="#06033a" stop-opacity="0"/><stop offset="0.78" stop-color="#06033a" stop-opacity="0"/><stop offset="1" stop-color="#06033a" stop-opacity="0.6"/></linearGradient>
+  <radialGradient id="star-glow-fill"><stop stop-color="#fffbe0" stop-opacity="1"/><stop offset="0.55" stop-color="#fef058" stop-opacity="0.55"/><stop offset="1" stop-color="#fef058" stop-opacity="0"/></radialGradient>
+  <linearGradient id="drum1-fill" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#0b4fd8"/><stop offset="0.3" stop-color="#2fb8ff"/><stop offset="0.5" stop-color="#5ff0ff"/><stop offset="0.7" stop-color="#2fb8ff"/><stop offset="1" stop-color="#0b4fd8"/></linearGradient><linearGradient id="drum2-fill" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#e6a84e"/><stop offset="0.3" stop-color="#fbe9b8"/><stop offset="0.5" stop-color="#fffbea"/><stop offset="0.7" stop-color="#fbe9b8"/><stop offset="1" stop-color="#e6a84e"/></linearGradient><linearGradient id="drum3-fill" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#0b4fd8"/><stop offset="0.3" stop-color="#2fb8ff"/><stop offset="0.5" stop-color="#5ff0ff"/><stop offset="0.7" stop-color="#2fb8ff"/><stop offset="1" stop-color="#0b4fd8"/></linearGradient>
+  <clipPath id="clip-dial-1"><rect x="-158.0" y="-67.0" width="100" height="160" rx="16"/></clipPath><clipPath id="clip-dial-2"><rect x="-50.0" y="-67.0" width="100" height="160" rx="16"/></clipPath><clipPath id="clip-dial-3"><rect x="58.0" y="-67.0" width="100" height="160" rx="16"/></clipPath>
+</defs>
+<g id="badge">
+<g id="ribbon-left">
+<path d="M249.055 661.876L406.663 701.218L324.916 916.46L266.057 857.608L169.413 853.127L249.055 661.876Z" fill="#170a66" stroke="#170a66" stroke-width="54" stroke-linejoin="round"/>
+<path d="M249.055 661.876L406.663 701.218L324.916 916.46L266.057 857.608L169.413 853.127L249.055 661.876Z" fill="#14c6ff"/>
+<path d="M258.775 687.908L381.415 718.179L324.199 867.632L275.297 821.658L205.941 817.822L258.775 687.908Z" fill="#1a7ff6"/>
+<path d="M249.055 661.878L406.663 701.22L390.014 738.941L235.669 704.22L249.055 661.878Z" fill="#3a3ff0"/>
+</g>
+<g id="ribbon-right">
+<path d="M629.245 661.394L472.176 702.836L556.789 916.969L614.858 857.336L711.433 851.566L629.245 661.394Z" fill="#170a66" stroke="#170a66" stroke-width="54" stroke-linejoin="round"/>
+<path d="M629.245 661.394L472.176 702.836L556.789 916.969L614.858 857.336L711.433 851.566L629.245 661.394Z" fill="#14c6ff"/>
+<path d="M619.873 687.552L497.648 719.457L556.854 868.134L605.138 821.511L674.437 816.749L619.873 687.552Z" fill="#1a7ff6"/>
+<path d="M629.245 661.394L472.176 702.836L489.327 740.331L643.195 703.554L629.245 661.394Z" fill="#3a3ff0"/>
+</g>
+<g id="medal">
+<circle id="medal-outline" cx="420" cy="412" r="392" fill="#14074f"/>
+<circle cx="420" cy="412" r="362" fill="url(#ring-fill)"/>
+<circle cx="420" cy="422" r="350" stroke="#0721b5" stroke-width="12" opacity="0.35"/>
+<path d="M 98 330 A 330 330 0 0 1 380 84" stroke="#67f8fd" stroke-width="16" stroke-linecap="round"/>
+<path d="M 446 82 A 330 330 0 0 1 572 112" stroke="#96f7fc" stroke-width="10" stroke-linecap="round" opacity="0.85"/>
+<path d="M 128 520 A 300 300 0 0 0 176 600" stroke="#67f8fd" stroke-width="8" stroke-linecap="round" opacity="0.6"/>
+<circle cx="420" cy="412" r="314" fill="#0721b5"/>
+<circle cx="420" cy="412" r="306" fill="url(#inner-fill)"/>
+<ellipse cx="330" cy="200" rx="120" ry="34" fill="#2a1a8f" opacity="0.45" transform="rotate(-12 330 200)"/>
+</g>
+<g id="bursts">
+  <path id="burst-1" d="M 159.5 482.4 L 115.2 480.5 L 116.5 498.4 L 160 490.4 Z" fill="#ffc83a" stroke="#ffc83a" stroke-width="6" stroke-linejoin="round"/>
+  <path id="burst-2" d="M 168.7 387.4 L 128.4 369 L 122.9 386.2 L 166.2 395 Z" fill="#ffc83a" stroke="#ffc83a" stroke-width="6" stroke-linejoin="round"/>
+  <path id="burst-3" d="M 209 297.6 L 178.5 265.5 L 167 279.3 L 203.9 303.7 Z" fill="#ffc83a" stroke="#ffc83a" stroke-width="6" stroke-linejoin="round"/>
+  <path id="burst-4" d="M 610.4 303.7 L 647.3 279.3 L 635.8 265.5 L 605.3 297.6 Z" fill="#ffc83a" stroke="#ffc83a" stroke-width="6" stroke-linejoin="round"/>
+  <path id="burst-5" d="M 648.1 395 L 691.4 386.2 L 685.9 369 L 645.6 387.4 Z" fill="#ffc83a" stroke="#ffc83a" stroke-width="6" stroke-linejoin="round"/>
+  <path id="burst-6" d="M 654.3 490.4 L 697.8 498.4 L 699.1 480.5 L 654.8 482.4 Z" fill="#ffc83a" stroke="#ffc83a" stroke-width="6" stroke-linejoin="round"/>
+</g>
+<g id="sparkles">
+    <g id="star-1" transform="translate(614 216)">
+      <path d="M 0 -30 C 6.0 -6.0 6.0 -6.0 30 0 C 6.0 6.0 6.0 6.0 0 30 C -6.0 6.0 -6.0 6.0 -30 0 C -6.0 -6.0 -6.0 -6.0 0 -30 Z" fill="#f59204" opacity="0.5" filter="url(#star-glow)"/>
+      <path d="M 0 -30 C 6.0 -6.0 6.0 -6.0 30 0 C 6.0 6.0 6.0 6.0 0 30 C -6.0 6.0 -6.0 6.0 -30 0 C -6.0 -6.0 -6.0 -6.0 0 -30 Z" fill="url(#gold-fill)" stroke="#f59204" stroke-width="5" stroke-linejoin="round"/>
+      <ellipse cx="-3.6" cy="-9" rx="2.1" ry="4.8" fill="#fefde4" opacity="0.9"/>
+    </g>
+    <g id="star-2" transform="translate(404 252)">
+      <path d="M 0 -24 C 4.800000000000001 -4.800000000000001 4.800000000000001 -4.800000000000001 24 0 C 4.800000000000001 4.800000000000001 4.800000000000001 4.800000000000001 0 24 C -4.800000000000001 4.800000000000001 -4.800000000000001 4.800000000000001 -24 0 C -4.800000000000001 -4.800000000000001 -4.800000000000001 -4.800000000000001 0 -24 Z" fill="#f59204" opacity="0.5" filter="url(#star-glow)"/>
+      <path d="M 0 -24 C 4.800000000000001 -4.800000000000001 4.800000000000001 -4.800000000000001 24 0 C 4.800000000000001 4.800000000000001 4.800000000000001 4.800000000000001 0 24 C -4.800000000000001 4.800000000000001 -4.800000000000001 4.800000000000001 -24 0 C -4.800000000000001 -4.800000000000001 -4.800000000000001 -4.800000000000001 0 -24 Z" fill="url(#gold-fill)" stroke="#f59204" stroke-width="5" stroke-linejoin="round"/>
+      <ellipse cx="-2.9" cy="-7.2" rx="1.7" ry="3.8" fill="#fefde4" opacity="0.9"/>
+    </g>
+</g>
+<g id="padlock" transform="translate(406 480) rotate(6) scale(1.1)">
+    <g id="lock-top">
+      <rect x="-172" y="-136" width="344" height="60" rx="20" fill="#e26204" transform="translate(5 6)"/>
+      <rect x="-172" y="-136" width="344" height="60" rx="20" fill="url(#top-fill)"/>
+      <path d="M -150 -131 H 150" stroke="#fffbe0" stroke-width="5" stroke-linecap="round" opacity="0.8"/>
+      <ellipse id="hole-left" cx="-118" cy="-119" rx="31.0" ry="9" fill="#5a1c02"/>
+      <ellipse id="hole-right" cx="118" cy="-119" rx="31.0" ry="9" fill="#5a1c02"/>
+      <path d="M 91.0 -116 Q 118 -108 145.0 -116" stroke="#2a0c01" stroke-width="5" stroke-linecap="round" opacity="0.6"/>
+    </g>
+    <g id="shackle" transform="rotate(-13 -118 -119) translate(0 -40)">
+      <path d="M -118 -40 V -136 A 118 118 0 0 1 118 -136 V -96" stroke="#b84a04" stroke-width="60" transform="translate(5 9)"/>
+      <path d="M -118 -40 V -136 A 118 118 0 0 1 118 -136 V -96" stroke="#e26204" stroke-width="58"/>
+      <path d="M -118 -40 V -136 A 118 118 0 0 1 118 -136 V -96" stroke="#f59204" stroke-width="50"/>
+      <path d="M -118 -40 V -136 A 118 118 0 0 1 118 -136 V -96" stroke="#fccb12" stroke-width="36" transform="translate(-4 -3)"/>
+      <path d="M -127 -128 V -136 A 127 127 0 0 1 -72.8 -240" stroke="#fef058" stroke-width="13" stroke-linecap="round"/>
+      <path d="M -43.8 -256.3 A 128 128 0 0 1 22.2 -262.1" stroke="#fffbe0" stroke-width="8" stroke-linecap="round" opacity="0.9"/>
+      <path d="M 97.0 -101 H 139.0" stroke="#fde15e" stroke-width="5" stroke-linecap="round"/>
+    </g>
+    <g id="lock-body">
+      <path d="M -141 -95 H 155 A 52 52 0 0 1 207 -43 V 103 A 52 52 0 0 1 155 155 H -141 A 52 52 0 0 1 -193 103 V -43 A 52 52 0 0 1 -141 -95 Z" fill="#c84f04"/>
+      <path d="M -145 -103 H 151 A 52 52 0 0 1 203 -51 V 95 A 52 52 0 0 1 151 147 H -145 A 52 52 0 0 1 -197 95 V -51 A 52 52 0 0 1 -145 -103 Z" fill="#e26204"/>
+      <path d="M -148 -110 H 148 A 52 52 0 0 1 200 -58 V 88 A 52 52 0 0 1 148 140 H -148 A 52 52 0 0 1 -200 88 V -58 A 52 52 0 0 1 -148 -110 Z" fill="url(#body-fill)"/>
+      <path d="M -170 -96 Q -192 -90 -190 -50" stroke="#fffbe0" stroke-width="9" stroke-linecap="round" opacity="0.9"/>
+      <path d="M -136 -101 H 130" stroke="#fef7a0" stroke-width="7" stroke-linecap="round"/>
+      <path d="M 154 -101 H 166" stroke="#fffbe0" stroke-width="7" stroke-linecap="round"/>
+      <path d="M -160 128 H 160" stroke="#f59204" stroke-width="10" stroke-linecap="round" opacity="0.7"/>
+      <rect x="-176" y="-88" width="352" height="202" rx="34" fill="#f59204"/>
+      <rect x="-170" y="-80" width="340" height="190" rx="30" fill="#fef058" opacity="0.9"/>
+      <rect id="dial-window" x="-168" y="-82" width="336" height="190" rx="28" fill="#14074f"/>
+      <rect x="-160" y="-76" width="320" height="14" rx="7" fill="#0b0430" opacity="0.8"/>
+      <path d="M -115 -90 L -101 -90 L -108 -81 Z" fill="#c84f04" stroke="#c84f04" stroke-width="4" stroke-linejoin="round"/>
+      <path d="M -115 116 L -101 116 L -108 107 Z" fill="#c84f04" stroke="#c84f04" stroke-width="4" stroke-linejoin="round"/>
+      <path d="M -7 -90 L 7 -90 L 0 -81 Z" fill="#c84f04" stroke="#c84f04" stroke-width="4" stroke-linejoin="round"/>
+      <path d="M -7 116 L 7 116 L 0 107 Z" fill="#c84f04" stroke="#c84f04" stroke-width="4" stroke-linejoin="round"/>
+      <path d="M 101 -90 L 115 -90 L 108 -81 Z" fill="#c84f04" stroke="#c84f04" stroke-width="4" stroke-linejoin="round"/>
+      <path d="M 101 116 L 115 116 L 108 107 Z" fill="#c84f04" stroke="#c84f04" stroke-width="4" stroke-linejoin="round"/>
+    </g>
+    <g id="dials">
+      <g id="dial-1">
+        <rect id="dial-1-drum" x="-158.0" y="-67.0" width="100" height="160" rx="16" fill="url(#drum1-fill)"/>
+        <g clip-path="url(#clip-dial-1)">
+        <g id="dial-1-reel">
+          <g id="d1-circle" transform="translate(-108 13) scale(1 1)"><g transform="scale(1.22)"><circle r="26" fill="#0a2db0"/><circle cx="-9" cy="-10" r="6" fill="#ffffff" opacity="0.35"/></g></g>
+          <g id="d1-triangle" transform="translate(-108 86.4) scale(1 0.5)"><g transform="scale(1.22)"><path d="M 0 -25 L 25 20 L -25 20 Z" fill="#0a2db0" stroke="#0a2db0" stroke-width="10" stroke-linejoin="round"/><path d="M -3 -14 L -13 4" stroke="#ffffff" stroke-width="5" stroke-linecap="round" opacity="0.35"/></g></g>
+          <g id="d1-star" transform="translate(-108 13) scale(1 1)" opacity="0"><g transform="scale(1.22)"><path d="M 0 -29 L 7.9 -8.9 L 29.5 -7.6 L 12.8 6.2 L 18.2 27.1 L 0 15.5 L -18.2 27.1 L -12.8 6.2 L -29.5 -7.6 L -7.9 -8.9 Z" fill="#061c80" stroke="#061c80" stroke-width="7" stroke-linejoin="round" transform="translate(1.5 2.5)"/><path d="M 0 -29 L 7.9 -8.9 L 29.5 -7.6 L 12.8 6.2 L 18.2 27.1 L 0 15.5 L -18.2 27.1 L -12.8 6.2 L -29.5 -7.6 L -7.9 -8.9 Z" fill="#0a2db0" stroke="#0a2db0" stroke-width="6" stroke-linejoin="round"/><path d="M -4 -16 L -8 -4" stroke="#fffbe0" stroke-width="4.5" stroke-linecap="round" opacity="0.85"/></g></g>
+          <g id="d1-square" transform="translate(-108 13) scale(1 1)" opacity="0"><g transform="scale(1.22)"><rect x="-22" y="-22" width="44" height="44" rx="9" fill="#0a2db0"/><path d="M -12 -13 H 4" stroke="#ffffff" stroke-width="5" stroke-linecap="round" opacity="0.35"/></g></g>
+          <g id="d1-diamond" transform="translate(-108 13) scale(1 1)" opacity="0"><g transform="scale(1.22)"><path d="M 0 -28 L 26 0 L 0 28 L -26 0 Z" fill="#0a2db0" stroke="#0a2db0" stroke-width="6" stroke-linejoin="round"/></g></g>
+          <g id="d1-plus" transform="translate(-108 -60.4) scale(1 0.5)"><g transform="scale(1.22)"><path d="M 0 -24 V 24 M -24 0 H 24" stroke="#0a2db0" stroke-width="16" stroke-linecap="round"/></g></g>
+        </g>
+        </g>
+        <rect x="-158.0" y="-67.0" width="100" height="160" rx="16" fill="url(#drum-shade)"/>
+        <rect x="-158.0" y="-67.0" width="100" height="160" rx="16" stroke="#0721b5" stroke-width="4" opacity="0.55"/>
+      </g>
+      <g id="dial-2">
+        <rect id="dial-2-drum" x="-50.0" y="-67.0" width="100" height="160" rx="16" fill="url(#drum2-fill)"/>
+        <ellipse id="dial-glow" cx="0" cy="13" rx="46" ry="52" fill="url(#star-glow-fill)" opacity="0.85"/>
+        <g clip-path="url(#clip-dial-2)">
+        <g id="dial-2-reel">
+          <g id="d2-circle" transform="translate(0 13) scale(1 1)" opacity="0"><g transform="scale(1.22)"><circle r="26" fill="#fbb40e"/><circle cx="-9" cy="-10" r="6" fill="#ffffff" opacity="0.35"/></g></g>
+          <g id="d2-triangle" transform="translate(0 -60.4) scale(1 0.5)"><g transform="scale(1.22)"><path d="M 0 -25 L 25 20 L -25 20 Z" fill="#fbb40e" stroke="#fbb40e" stroke-width="10" stroke-linejoin="round"/><path d="M -3 -14 L -13 4" stroke="#ffffff" stroke-width="5" stroke-linecap="round" opacity="0.35"/></g></g>
+          <g id="d2-star" transform="translate(0 13) scale(1 1)"><g transform="scale(1.22)"><path d="M 0 -29 L 7.9 -8.9 L 29.5 -7.6 L 12.8 6.2 L 18.2 27.1 L 0 15.5 L -18.2 27.1 L -12.8 6.2 L -29.5 -7.6 L -7.9 -8.9 Z" fill="#d86a04" stroke="#d86a04" stroke-width="7" stroke-linejoin="round" transform="translate(1.5 2.5)"/><path d="M 0 -29 L 7.9 -8.9 L 29.5 -7.6 L 12.8 6.2 L 18.2 27.1 L 0 15.5 L -18.2 27.1 L -12.8 6.2 L -29.5 -7.6 L -7.9 -8.9 Z" fill="#fbb40e" stroke="#fbb40e" stroke-width="6" stroke-linejoin="round"/><path d="M -4 -16 L -8 -4" stroke="#fffbe0" stroke-width="4.5" stroke-linecap="round" opacity="0.85"/></g></g>
+          <g id="d2-square" transform="translate(0 86.4) scale(1 0.5)"><g transform="scale(1.22)"><rect x="-22" y="-22" width="44" height="44" rx="9" fill="#fbb40e"/><path d="M -12 -13 H 4" stroke="#ffffff" stroke-width="5" stroke-linecap="round" opacity="0.35"/></g></g>
+          <g id="d2-diamond" transform="translate(0 13) scale(1 1)" opacity="0"><g transform="scale(1.22)"><path d="M 0 -28 L 26 0 L 0 28 L -26 0 Z" fill="#fbb40e" stroke="#fbb40e" stroke-width="6" stroke-linejoin="round"/></g></g>
+          <g id="d2-plus" transform="translate(0 13) scale(1 1)" opacity="0"><g transform="scale(1.22)"><path d="M 0 -24 V 24 M -24 0 H 24" stroke="#fbb40e" stroke-width="16" stroke-linecap="round"/></g></g>
+        </g>
+        </g>
+        <rect x="-50.0" y="-67.0" width="100" height="160" rx="16" fill="url(#drum-shade)"/>
+        <rect x="-50.0" y="-67.0" width="100" height="160" rx="16" stroke="#c06a14" stroke-width="4" opacity="0.55"/>
+      </g>
+      <g id="dial-3">
+        <rect id="dial-3-drum" x="58.0" y="-67.0" width="100" height="160" rx="16" fill="url(#drum3-fill)"/>
+        <g clip-path="url(#clip-dial-3)">
+        <g id="dial-3-reel">
+          <g id="d3-circle" transform="translate(108 -60.4) scale(1 0.5)"><g transform="scale(1.22)"><circle r="26" fill="#0a2db0"/><circle cx="-9" cy="-10" r="6" fill="#ffffff" opacity="0.35"/></g></g>
+          <g id="d3-triangle" transform="translate(108 13) scale(1 1)"><g transform="scale(1.22)"><path d="M 0 -25 L 25 20 L -25 20 Z" fill="#0a2db0" stroke="#0a2db0" stroke-width="10" stroke-linejoin="round"/><path d="M -3 -14 L -13 4" stroke="#ffffff" stroke-width="5" stroke-linecap="round" opacity="0.35"/></g></g>
+          <g id="d3-star" transform="translate(108 86.4) scale(1 0.5)"><g transform="scale(1.22)"><path d="M 0 -29 L 7.9 -8.9 L 29.5 -7.6 L 12.8 6.2 L 18.2 27.1 L 0 15.5 L -18.2 27.1 L -12.8 6.2 L -29.5 -7.6 L -7.9 -8.9 Z" fill="#061c80" stroke="#061c80" stroke-width="7" stroke-linejoin="round" transform="translate(1.5 2.5)"/><path d="M 0 -29 L 7.9 -8.9 L 29.5 -7.6 L 12.8 6.2 L 18.2 27.1 L 0 15.5 L -18.2 27.1 L -12.8 6.2 L -29.5 -7.6 L -7.9 -8.9 Z" fill="#0a2db0" stroke="#0a2db0" stroke-width="6" stroke-linejoin="round"/><path d="M -4 -16 L -8 -4" stroke="#fffbe0" stroke-width="4.5" stroke-linecap="round" opacity="0.85"/></g></g>
+          <g id="d3-square" transform="translate(108 13) scale(1 1)" opacity="0"><g transform="scale(1.22)"><rect x="-22" y="-22" width="44" height="44" rx="9" fill="#0a2db0"/><path d="M -12 -13 H 4" stroke="#ffffff" stroke-width="5" stroke-linecap="round" opacity="0.35"/></g></g>
+          <g id="d3-diamond" transform="translate(108 13) scale(1 1)" opacity="0"><g transform="scale(1.22)"><path d="M 0 -28 L 26 0 L 0 28 L -26 0 Z" fill="#0a2db0" stroke="#0a2db0" stroke-width="6" stroke-linejoin="round"/></g></g>
+          <g id="d3-plus" transform="translate(108 13) scale(1 1)" opacity="0"><g transform="scale(1.22)"><path d="M 0 -24 V 24 M -24 0 H 24" stroke="#0a2db0" stroke-width="16" stroke-linecap="round"/></g></g>
+        </g>
+        </g>
+        <rect x="58.0" y="-67.0" width="100" height="160" rx="16" fill="url(#drum-shade)"/>
+        <rect x="58.0" y="-67.0" width="100" height="160" rx="16" stroke="#0721b5" stroke-width="4" opacity="0.55"/>
+      </g>
+    </g>
+  </g>
+</g>
+</svg>

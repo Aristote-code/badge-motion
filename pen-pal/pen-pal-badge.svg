@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Pen Pal badge (open envelope + letter), source artwork. Same workflow as the other badges.
+  Layer names the animation uses:
+    badge, medal, ribbon-left, ribbon-right, sparkles (star-1, star-2),
+    envelope (flies in and lands), envelope-back (purple lining), flap-open (inner/purple side, folded up behind the letter),
+    flap-closed (outer/gold side, folded down over the pocket; flips up through 0 into flap-open), seal (heart seal on the closed flap),
+    letter (slides up out of the pocket; its parent group clips it to the envelope), letter-lines (line-1.. write on left → right),
+    heart (pops + beats), pocket (side flaps + bottom flap, in front of the letter; clipped to the envelope's rounded body so no flap corner pokes out), burst (burst-1.. pop + pulse)
+  The envelope is centred on the medal (420, 412).
+-->
+<svg xmlns="http://www.w3.org/2000/svg" width="840" height="960" viewBox="0 0 840 960" fill="none">
+<defs>
+  <linearGradient id="ring-fill" x1="0.2" y1="0" x2="0.8" y2="1"><stop stop-color="#56e84a"/><stop offset="0.5" stop-color="#22b52a"/><stop offset="1" stop-color="#56e84a"/></linearGradient>
+  <radialGradient id="inner-fill" cx="0.4" cy="0.3" r="0.8"><stop stop-color="#1a6a2e"/><stop offset="1" stop-color="#0b3a1a"/></radialGradient>
+  <linearGradient id="gold-fill" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#fef058"/><stop offset="1" stop-color="#fccb12"/></linearGradient>
+  <linearGradient id="gold-deep" x1="0.2" y1="0" x2="0.8" y2="1"><stop stop-color="#fee05a"/><stop offset="0.6" stop-color="#fcc513"/><stop offset="1" stop-color="#f59204"/></linearGradient>
+  <filter id="star-glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="6"/></filter>
+  <linearGradient id="lining-fill" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#6a30d0"/><stop offset="0.35" stop-color="#9a62f4"/><stop offset="1" stop-color="#8b52ec"/></linearGradient>
+  <linearGradient id="flap-inner" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#c39bff"/><stop offset="1" stop-color="#8d50f0"/></linearGradient>
+  <linearGradient id="flap-outer" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#fee45a"/><stop offset="1" stop-color="#fcc012"/></linearGradient>
+  <linearGradient id="paper-fill" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#fffaf0"/><stop offset="0.6" stop-color="#fdf1d8"/><stop offset="1" stop-color="#f6d9b4"/></linearGradient>
+  <linearGradient id="side-fill" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#fdd64a"/><stop offset="1" stop-color="#f9b21c"/></linearGradient>
+  <linearGradient id="side-fill-r" x1="1" y1="0" x2="0" y2="0"><stop stop-color="#f7a412"/><stop offset="1" stop-color="#f9b21c"/></linearGradient>
+  <linearGradient id="bottom-fill" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#fed23a"/><stop offset="1" stop-color="#f9ad16"/></linearGradient>
+  <clipPath id="clip-body"><path d="M -200 0 H 200 Q 226 0 226 26 V 252 Q 226 278 200 278 H -200 Q -226 278 -226 252 V 26 Q -226 0 -200 0 Z"/></clipPath>
+  <clipPath id="clip-pocket"><rect x="-226" y="-1000" width="452" height="1266"/></clipPath>
+</defs>
+<g id="badge">
+<g id="ribbon-left">
+<path d="M249.055 661.876L406.663 701.218L324.916 916.46L266.057 857.608L169.413 853.127L249.055 661.876Z" fill="#0b3d12" stroke="#0b3d12" stroke-width="54" stroke-linejoin="round"/>
+<path d="M249.055 661.876L406.663 701.218L324.916 916.46L266.057 857.608L169.413 853.127L249.055 661.876Z" fill="#8af27a"/>
+<path d="M258.775 687.908L381.415 718.179L324.199 867.632L275.297 821.658L205.941 817.822L258.775 687.908Z" fill="#34c83a"/>
+<path d="M249.055 661.878L406.663 701.22L390.014 738.941L235.669 704.22L249.055 661.878Z" fill="#1c9a2a"/>
+</g>
+<g id="ribbon-right">
+<path d="M629.245 661.394L472.176 702.836L556.789 916.969L614.858 857.336L711.433 851.566L629.245 661.394Z" fill="#0b3d12" stroke="#0b3d12" stroke-width="54" stroke-linejoin="round"/>
+<path d="M629.245 661.394L472.176 702.836L556.789 916.969L614.858 857.336L711.433 851.566L629.245 661.394Z" fill="#8af27a"/>
+<path d="M619.873 687.552L497.648 719.457L556.854 868.134L605.138 821.511L674.437 816.749L619.873 687.552Z" fill="#34c83a"/>
+<path d="M629.245 661.394L472.176 702.836L489.327 740.331L643.195 703.554L629.245 661.394Z" fill="#1c9a2a"/>
+</g>
+<g id="medal">
+<circle id="medal-outline" cx="420" cy="412" r="392" fill="#0b3d12"/>
+<circle cx="420" cy="412" r="362" fill="url(#ring-fill)"/>
+<circle cx="420" cy="422" r="350" stroke="#13852a" stroke-width="12" opacity="0.35"/>
+<path d="M 98 330 A 330 330 0 0 1 380 84" stroke="#c4ff9e" stroke-width="16" stroke-linecap="round"/>
+<path d="M 446 82 A 330 330 0 0 1 572 112" stroke="#e2ffcc" stroke-width="10" stroke-linecap="round" opacity="0.85"/>
+<path d="M 128 520 A 300 300 0 0 0 176 600" stroke="#c4ff9e" stroke-width="8" stroke-linecap="round" opacity="0.6"/>
+<circle cx="420" cy="412" r="314" fill="#13852a"/>
+<circle cx="420" cy="412" r="306" fill="url(#inner-fill)"/>
+<ellipse cx="330" cy="200" rx="120" ry="34" fill="#2a7a3e" opacity="0.45" transform="rotate(-12 330 200)"/>
+</g>
+<g id="sparkles">
+    <g id="star-1" transform="translate(650.0 263.0)">
+      <path d="M 0 -30 C 6.0 -6.0 6.0 -6.0 30 0 C 6.0 6.0 6.0 6.0 0 30 C -6.0 6.0 -6.0 6.0 -30 0 C -6.0 -6.0 -6.0 -6.0 0 -30 Z" fill="#f59204" opacity="0.5" filter="url(#star-glow)"/>
+      <path d="M 0 -30 C 6.0 -6.0 6.0 -6.0 30 0 C 6.0 6.0 6.0 6.0 0 30 C -6.0 6.0 -6.0 6.0 -30 0 C -6.0 -6.0 -6.0 -6.0 0 -30 Z" fill="url(#gold-fill)" stroke="#f59204" stroke-width="5" stroke-linejoin="round"/>
+      <ellipse cx="-3.6" cy="-9" rx="2.1" ry="4.8" fill="#fefde4" opacity="0.9"/>
+    </g>
+    <g id="star-2" transform="translate(688.0 369.0)">
+      <path d="M 0 -18 C 3.6 -3.6 3.6 -3.6 18 0 C 3.6 3.6 3.6 3.6 0 18 C -3.6 3.6 -3.6 3.6 -18 0 C -3.6 -3.6 -3.6 -3.6 0 -18 Z" fill="#f59204" opacity="0.5" filter="url(#star-glow)"/>
+      <path d="M 0 -18 C 3.6 -3.6 3.6 -3.6 18 0 C 3.6 3.6 3.6 3.6 0 18 C -3.6 3.6 -3.6 3.6 -18 0 C -3.6 -3.6 -3.6 -3.6 0 -18 Z" fill="url(#gold-fill)" stroke="#f59204" stroke-width="5" stroke-linejoin="round"/>
+      <ellipse cx="-2.2" cy="-5.4" rx="1.3" ry="2.9" fill="#fefde4" opacity="0.9"/>
+    </g>
+</g>
+  <g id="burst" transform="translate(420 359)">
+<path id="burst-1" d="M -184.2 -148.2 L -229.2 -171.7 L -237.8 -145.1 L -187.6 -137.7 Z" fill="#ffd23a" stroke="#ffd23a" stroke-width="6" stroke-linejoin="round"/>
+<path id="burst-2" d="M -167.5 -166.5 L -191.6 -211.1 L -213.7 -193.9 L -176.2 -159.7 Z" fill="#ffd23a" stroke="#ffd23a" stroke-width="6" stroke-linejoin="round"/>
+<path id="burst-3" d="M -143.4 -172.3 L -138.5 -222.8 L -166.4 -220.8 L -154.4 -171.5 Z" fill="#ffd23a" stroke="#ffd23a" stroke-width="6" stroke-linejoin="round"/>
+  </g>
+  <g id="envelope" transform="translate(420 359)">
+    <path d="M -200 0 H 200 Q 226 0 226 26 V 252 Q 226 278 200 278 H -200 Q -226 278 -226 252 V 26 Q -226 0 -200 0 Z" transform="translate(3 6)" fill="#14301a" stroke="#14301a" stroke-width="18" stroke-linejoin="round"/>
+    <path d="M -200 0 H 200 Q 226 0 226 26 V 252 Q 226 278 200 278 H -200 Q -226 278 -226 252 V 26 Q -226 0 -200 0 Z" fill="#14301a" stroke="#14301a" stroke-width="18" stroke-linejoin="round"/>
+    <g id="envelope-back">
+      <path d="M -200 0 H 200 Q 226 0 226 26 V 252 Q 226 278 200 278 H -200 Q -226 278 -226 252 V 26 Q -226 0 -200 0 Z" fill="url(#lining-fill)"/>
+    </g>
+    <g id="flap-open">
+      <path d="M -218 6 L 0 -176 L 218 6" stroke="#14301a" stroke-width="34" stroke-linejoin="round" stroke-linecap="round"/>
+      <path d="M -218 6 L 0 -176 L 218 6 Z" fill="url(#flap-inner)" stroke="url(#flap-inner)" stroke-width="16" stroke-linejoin="round"/>
+      <path d="M -122 -66.9 L -31.6 -147.8" stroke="#d9c2ff" stroke-width="9" stroke-linecap="round" opacity="0.9"/>
+      <path d="M -196 4 H 196" stroke="#6a35c8" stroke-width="5" stroke-linecap="round" opacity="0.5"/>
+    </g>
+    <g clip-path="url(#clip-pocket)">
+      <g id="letter">
+        <rect x="-146.0" y="-126" width="300" height="292" rx="22" fill="#14301a" opacity="0.35"/>
+        <rect x="-150.0" y="-136" width="300" height="292" rx="22" fill="url(#paper-fill)" stroke="#14301a" stroke-width="10"/>
+        <path d="M -124.0 -122 H 80.0" stroke="#ffffff" stroke-width="7" stroke-linecap="round" opacity="0.9"/>
+        <g id="letter-lines">
+          <path id="line-1" d="M -112 -20 H 112" stroke="#c4b3c8" stroke-width="17" stroke-linecap="round"/>
+          <path id="line-2" d="M -112 22 H 92" stroke="#c4b3c8" stroke-width="17" stroke-linecap="round"/>
+          <path id="line-3" d="M -112 64 H 40" stroke="#c4b3c8" stroke-width="17" stroke-linecap="round"/>
+        </g>
+        <g id="heart" transform="translate(0 -70)">
+          <path d="M 0 34.2 C -17.1 22.8 -38 9.5 -38 -9.5 C -38 -24.7 -24.7 -34.2 -13.3 -34.2 C -5.7 -34.2 0 -29.3 0 -21.7 C 0 -29.3 5.7 -34.2 13.3 -34.2 C 24.7 -34.2 38 -24.7 38 -9.5 C 38 9.5 17.1 22.8 0 34.2 Z" transform="translate(2 4)" fill="#c8303f" stroke="#c8303f" stroke-width="6.8" stroke-linejoin="round"/><path d="M 0 34.2 C -17.1 22.8 -38 9.5 -38 -9.5 C -38 -24.7 -24.7 -34.2 -13.3 -34.2 C -5.7 -34.2 0 -29.3 0 -21.7 C 0 -29.3 5.7 -34.2 13.3 -34.2 C 24.7 -34.2 38 -24.7 38 -9.5 C 38 9.5 17.1 22.8 0 34.2 Z" fill="#ff5a5f" stroke="#ff5a5f" stroke-width="6.8" stroke-linejoin="round"/><ellipse cx="-18.2" cy="-16" rx="6.5" ry="4.2" transform="rotate(-35 -18.2 -16)" fill="#ffffff" opacity="0.85"/>
+        </g>
+      </g>
+    </g>
+    <g id="pocket">
+     <g clip-path="url(#clip-body)">
+      <path d="M -222 6 L 0 150 L 222 6" stroke="#14301a" stroke-width="26" stroke-linejoin="round" stroke-linecap="round"/>
+      <path d="M -222 6 L 0 150 L -222 272 Z" fill="url(#side-fill)" stroke="url(#side-fill)" stroke-width="14" stroke-linejoin="round"/>
+      <path d="M 222 6 L 0 150 L 222 272 Z" fill="url(#side-fill-r)" stroke="url(#side-fill-r)" stroke-width="14" stroke-linejoin="round"/>
+      <path d="M -212 18 L -10 146" stroke="#fff4a8" stroke-width="8" stroke-linecap="round" opacity="0.95"/>
+      <path d="M 212 18 L 10 146" stroke="#fff4a8" stroke-width="8" stroke-linecap="round" opacity="0.8"/>
+      <path d="M -218 274 L 0 120 L 218 274 Z" transform="translate(0 -6)" fill="#d86d05" stroke="#d86d05" stroke-width="14" stroke-linejoin="round" opacity="0.8"/>
+      <path d="M -218 274 L 0 120 L 218 274 Z" fill="url(#bottom-fill)" stroke="url(#bottom-fill)" stroke-width="14" stroke-linejoin="round"/>
+      <path d="M -196 260 L -14 134" stroke="#fff4a8" stroke-width="8" stroke-linecap="round" opacity="0.9"/>
+      <path d="M -192 256 H 192" stroke="#e98a06" stroke-width="7" stroke-linecap="round" opacity="0.5"/>
+      <ellipse cx="-200" cy="100.1" rx="9" ry="22" fill="#fffbe0" opacity="0.85"/>
+      <circle cx="-200" cy="136.1" r="6" fill="#fffbe0" opacity="0.7"/>
+     </g>
+    </g>
+    <path d="M -226 26 V 252 Q -226 278 -200 278 H 200 Q 226 278 226 252 V 26" stroke="#14301a" stroke-width="10" stroke-linejoin="round" stroke-linecap="round"/>
+    <g id="flap-closed" opacity="0">
+      <path d="M -220 4 L 0 172 L 220 4 Z" transform="translate(0 7)" fill="#c25a04" stroke="#c25a04" stroke-width="16" stroke-linejoin="round" opacity="0.85"/>
+      <path d="M -220 4 L 0 172 L 220 4 Z" fill="url(#flap-outer)" stroke="url(#flap-outer)" stroke-width="16" stroke-linejoin="round"/>
+      <path d="M -194 14 L -18 150" stroke="#fff4a8" stroke-width="8" stroke-linecap="round" opacity="0.9"/>
+      <g id="seal" transform="translate(0 130)">
+        <circle r="34" fill="#a3182c" transform="translate(2 4)"/>
+        <circle r="34" fill="#e8344a"/>
+        <circle r="26" stroke="#ff8f9b" stroke-width="4" opacity="0.7"/>
+        <path d="M 0 11.7 C -5.9 7.8 -13 3.2 -13 -3.2 C -13 -8.4 -8.5 -11.7 -4.5 -11.7 C -1.9 -11.7 0 -10 0 -7.4 C 0 -10 1.9 -11.7 4.5 -11.7 C 8.5 -11.7 13 -8.4 13 -3.2 C 13 3.2 5.9 7.8 0 11.7 Z" transform="translate(2 4)" fill="#c8203a" stroke="#c8203a" stroke-width="2.3" stroke-linejoin="round"/><path d="M 0 11.7 C -5.9 7.8 -13 3.2 -13 -3.2 C -13 -8.4 -8.5 -11.7 -4.5 -11.7 C -1.9 -11.7 0 -10 0 -7.4 C 0 -10 1.9 -11.7 4.5 -11.7 C 8.5 -11.7 13 -8.4 13 -3.2 C 13 3.2 5.9 7.8 0 11.7 Z" fill="#ffd0d6" stroke="#ffd0d6" stroke-width="2.3" stroke-linejoin="round"/>
+      </g>
+    </g>
+  </g>
+</g>
+</svg>

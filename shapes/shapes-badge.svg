@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Shapes badge, source artwork. Same workflow as the rocket, compass and abacus badges.
+  Layer names the animation uses:
+    badge, medal (centre + shine mask), ribbon-left, ribbon-right,
+    triangle, circle, square (pop in, hop around the cycle, idle moves),
+    arrow-top, arrow-left (stroke paths draw on clockwise, filled head pops at the end),
+    sparkles (star-1, star-2 burst and twinkle)
+-->
+<svg xmlns="http://www.w3.org/2000/svg" width="840" height="960" viewBox="0 0 840 960" fill="none">
+<defs>
+  <linearGradient id="ring-fill" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#1b7ff7"/><stop offset="1" stop-color="#1e9bff"/></linearGradient>
+  <radialGradient id="inner-fill" cx="0.5" cy="0.42" r="0.6"><stop stop-color="#241383"/><stop offset="1" stop-color="#170a66"/></radialGradient>
+  <linearGradient id="tri-fill" x1="0.2" y1="0" x2="0.8" y2="1"><stop stop-color="#ffe14a"/><stop offset="1" stop-color="#ffb81a"/></linearGradient>
+  <linearGradient id="sq-fill" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#16c8ff"/><stop offset="1" stop-color="#1b7ff7"/></linearGradient>
+  <radialGradient id="ci-fill" cx="0.38" cy="0.32" r="0.75"><stop stop-color="#ff6a4d"/><stop offset="1" stop-color="#e8261f"/></radialGradient>
+  <filter id="glow" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="8"/></filter>
+</defs>
+<g id="badge">
+<g id="ribbon-left">
+<path id="Vector" d="M249.055 661.876L406.663 701.218L324.916 916.46L266.057 857.608L169.413 853.127L249.055 661.876Z" fill="#170A66" stroke="#170A66" stroke-width="54" stroke-linejoin="round"/>
+<path id="Vector_2" d="M249.055 661.876L406.663 701.218L324.916 916.46L266.057 857.608L169.413 853.127L249.055 661.876Z" fill="#14C6FF"/>
+<path id="Vector_3" d="M258.775 687.908L381.415 718.179L324.199 867.632L275.297 821.658L205.941 817.822L258.775 687.908Z" fill="#1A7FF6"/>
+<path id="Vector_4" d="M249.055 661.878L406.663 701.22L390.014 738.941L235.669 704.22L249.055 661.878Z" fill="#3A3FF0"/>
+</g>
+<g id="ribbon-right">
+<path id="Vector_5" d="M629.245 661.394L472.176 702.836L556.789 916.969L614.858 857.336L711.433 851.566L629.245 661.394Z" fill="#170A66" stroke="#170A66" stroke-width="54" stroke-linejoin="round"/>
+<path id="Vector_6" d="M629.245 661.394L472.176 702.836L556.789 916.969L614.858 857.336L711.433 851.566L629.245 661.394Z" fill="#14C6FF"/>
+<path id="Vector_7" d="M619.873 687.552L497.648 719.457L556.854 868.134L605.138 821.511L674.437 816.749L619.873 687.552Z" fill="#1A7FF6"/>
+<path id="Vector_8" d="M629.245 661.394L472.176 702.836L489.327 740.331L643.195 703.554L629.245 661.394Z" fill="#3A3FF0"/>
+</g>
+<g id="medal">
+<path id="medal-outline" d="M420 804C636.496 804 812 628.496 812 412C812 195.504 636.496 20 420 20C203.504 20 28 195.504 28 412C28 628.496 203.504 804 420 804Z" fill="#170A66"/>
+<path id="Vector_9" d="M420 774C619.927 774 782 611.927 782 412C782 212.073 619.927 50 420 50C220.073 50 58 212.073 58 412C58 611.927 220.073 774 420 774Z" fill="url(#ring-fill)"/>
+<path id="Vector_10" opacity="0.6" d="M420 774C614.404 774 772 616.404 772 422C772 227.596 614.404 70 420 70C225.596 70 68 227.596 68 422C68 616.404 225.596 774 420 774Z" stroke="#21B0FF" stroke-width="20"/>
+<path id="Vector_11" d="M106 300C126.14 242.511 161.53 191.578 208.384 152.65C255.238 113.723 311.794 88.2649 372 79" stroke="#63E9FF" stroke-width="14" stroke-linecap="round"/>
+<path id="Vector_12" opacity="0.8" d="M440.684 74.7659C481.634 76.9359 521.84 86.5836 559.316 103.232" stroke="#63E9FF" stroke-width="10" stroke-linecap="round"/>
+<path id="Vector_13" d="M420 720C590.104 720 728 582.104 728 412C728 241.896 590.104 104 420 104C249.896 104 112 241.896 112 412C112 582.104 249.896 720 420 720Z" fill="url(#inner-fill)"/>
+</g>
+<g id="sparkles">
+    <path id="star-1" transform="translate(227 266)" d="M 0 -29 C 5.22 -5.22 5.22 -5.22 29 0 C 5.22 5.22 5.22 5.22 0 29 C -5.22 5.22 -5.22 5.22 -29 0 C -5.22 -5.22 -5.22 -5.22 0 -29 Z" fill="#ffc83a"/>
+    <path id="star-2" transform="translate(555 588)" d="M 0 -34 C 6.12 -6.12 6.12 -6.12 34 0 C 6.12 6.12 6.12 6.12 0 34 C -6.12 6.12 -6.12 6.12 -34 0 C -6.12 -6.12 -6.12 -6.12 0 -34 Z" fill="#ffc83a"/>
+</g>
+<g id="arrows">
+  <g id="arrow-top">
+    <path id="arrow-top-glow" d="M 399.2 187.8 A 236 236 0 0 1 608.8 270.3" stroke="#ffc21f" stroke-width="30" stroke-linecap="round" opacity="0.35" filter="url(#glow)"/>
+    <path id="arrow-top-arc" d="M 399.2 187.8 A 236 236 0 0 1 608.8 270.3" stroke="#ffe14a" stroke-width="17" stroke-linecap="round"/>
+    <path id="arrow-top-head" d="M 638.4 305.5 L 630.2 236.7 L 572 285.5 Z" fill="#ffe14a" stroke="#ffe14a" stroke-width="12" stroke-linejoin="round"/>
+  </g>
+  <g id="arrow-left">
+    <path id="arrow-left-glow" d="M 232.3 554 A 236 236 0 0 1 203.6 349.1" stroke="#ffc21f" stroke-width="30" stroke-linecap="round" opacity="0.35" filter="url(#glow)"/>
+    <path id="arrow-left-arc" d="M 232.3 554 A 236 236 0 0 1 203.6 349.1" stroke="#ffe14a" stroke-width="17" stroke-linecap="round"/>
+    <path id="arrow-left-head" d="M 217.8 305.3 L 163.7 348.7 L 236 372.2 Z" fill="#ffe14a" stroke="#ffe14a" stroke-width="12" stroke-linejoin="round"/>
+  </g>
+</g>
+<g id="shapes">
+  <g id="circle">
+    <circle cx="557" cy="420" r="126" fill="#c71b24"/>
+    <circle cx="552" cy="410" r="126" fill="url(#ci-fill)"/>
+    <path d="M 532 308 A 104 104 0 0 1 626 354" stroke="#ffb3a3" stroke-width="12" stroke-linecap="round" opacity="0.9"/>
+    <ellipse cx="644" cy="406" rx="7" ry="18" fill="#ffb3a3" opacity="0.8"/>
+  </g>
+  <g id="triangle">
+    <path d="M 356.8 218.1 Q 335 192 321.2 223.1 L 243.8 396.9 Q 230 428 263.5 422.3 L 461.5 388.7 Q 495 383 473.2 356.9 Z" fill="#e87e00"/>
+    <path d="M 352.8 204.1 Q 331 178 317.2 209.1 L 239.8 382.9 Q 226 414 259.5 408.3 L 457.5 374.7 Q 491 369 469.2 342.9 Z" fill="url(#tri-fill)"/>
+    <path d="M 322 232 L 278 330" stroke="#fff3a6" stroke-width="11" stroke-linecap="round"/>
+    <ellipse cx="333" cy="212" rx="7" ry="11" fill="#fff8c8" transform="rotate(24 333 212)"/>
+  </g>
+  <g id="square">
+    <path d="M 304.3 458.6 Q 312.1 429.6 341.1 437.4 L 501.4 480.3 Q 530.4 488.1 522.6 517.1 L 479.7 677.4 Q 471.9 706.4 442.9 698.6 L 282.6 655.7 Q 253.6 647.9 261.4 618.9 Z" fill="#1d4fd8"/>
+    <path d="M 298.3 442.6 Q 306.1 413.6 335.1 421.4 L 495.4 464.3 Q 524.4 472.1 516.6 501.1 L 473.7 661.4 Q 465.9 690.4 436.9 682.6 L 276.6 639.7 Q 247.6 631.9 255.4 602.9 Z" fill="url(#sq-fill)"/>
+    <path d="M 317 457.9 Q 321.7 440.5 339 445.2 L 480.1 483 Q 497.5 487.7 492.8 505 L 455 646.1 Q 450.3 663.5 433 658.8 L 291.9 621 Q 274.5 616.3 279.2 599 Z" fill="#ffffff" opacity="0.08"/>
+    <path d="M 336.1 439.6 L 484.4 490.1" stroke="#a6f0ff" stroke-width="12" stroke-linecap="round"/>
+    <ellipse cx="332.1" cy="457.6" rx="9" ry="7" fill="#d6f8ff"/>
+  </g>
+</g>
+</g>
+</svg>

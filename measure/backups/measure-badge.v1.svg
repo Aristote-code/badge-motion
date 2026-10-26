@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Measure badge (ruler + protractor), source artwork. Same workflow as the other badges.
+  Layer names the animation uses:
+    badge, medal (centre + shine mask), ribbon-left, ribbon-right,
+    protractor (swings in), protractor-ticks + protractor-edge-ticks (each child ticks on in order),
+    ruler (slides in along its length), ruler-body (glint mask), ruler-ticks (each child counts up in order),
+    sparkles (star-1, star-2)
+-->
+<svg xmlns="http://www.w3.org/2000/svg" width="840" height="960" viewBox="0 0 840 960" fill="none">
+<defs>
+  <linearGradient id="ring-fill" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#1b7ff7"/><stop offset="1" stop-color="#1e9bff"/></linearGradient>
+  <radialGradient id="inner-fill" cx="0.45" cy="0.3" r="0.75"><stop stop-color="#3a1d9a"/><stop offset="1" stop-color="#170a66"/></radialGradient>
+  <linearGradient id="ruler-fill" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#ffe14a"/><stop offset="1" stop-color="#ffb81a"/></linearGradient>
+  <linearGradient id="pro-fill" x1="0" y1="0" x2="0.3" y2="1"><stop stop-color="#2ad0ff"/><stop offset="1" stop-color="#1b7ff7"/></linearGradient>
+</defs>
+<g id="badge">
+<g id="ribbon-left">
+<path id="Vector" d="M249.055 661.876L406.663 701.218L324.916 916.46L266.057 857.608L169.413 853.127L249.055 661.876Z" fill="#170A66" stroke="#170A66" stroke-width="54" stroke-linejoin="round"/>
+<path id="Vector_2" d="M249.055 661.876L406.663 701.218L324.916 916.46L266.057 857.608L169.413 853.127L249.055 661.876Z" fill="#14C6FF"/>
+<path id="Vector_3" d="M258.775 687.908L381.415 718.179L324.199 867.632L275.297 821.658L205.941 817.822L258.775 687.908Z" fill="#1A7FF6"/>
+<path id="Vector_4" d="M249.055 661.878L406.663 701.22L390.014 738.941L235.669 704.22L249.055 661.878Z" fill="#3A3FF0"/>
+</g>
+<g id="ribbon-right">
+<path id="Vector_5" d="M629.245 661.394L472.176 702.836L556.789 916.969L614.858 857.336L711.433 851.566L629.245 661.394Z" fill="#170A66" stroke="#170A66" stroke-width="54" stroke-linejoin="round"/>
+<path id="Vector_6" d="M629.245 661.394L472.176 702.836L556.789 916.969L614.858 857.336L711.433 851.566L629.245 661.394Z" fill="#14C6FF"/>
+<path id="Vector_7" d="M619.873 687.552L497.648 719.457L556.854 868.134L605.138 821.511L674.437 816.749L619.873 687.552Z" fill="#1A7FF6"/>
+<path id="Vector_8" d="M629.245 661.394L472.176 702.836L489.327 740.331L643.195 703.554L629.245 661.394Z" fill="#3A3FF0"/>
+</g>
+<g id="medal">
+<path id="medal-outline" d="M420 804C636.496 804 812 628.496 812 412C812 195.504 636.496 20 420 20C203.504 20 28 195.504 28 412C28 628.496 203.504 804 420 804Z" fill="#170A66"/>
+<path id="Vector_9" d="M420 774C619.927 774 782 611.927 782 412C782 212.073 619.927 50 420 50C220.073 50 58 212.073 58 412C58 611.927 220.073 774 420 774Z" fill="url(#ring-fill)"/>
+<path id="Vector_10" opacity="0.6" d="M420 774C614.404 774 772 616.404 772 422C772 227.596 614.404 70 420 70C225.596 70 68 227.596 68 422C68 616.404 225.596 774 420 774Z" stroke="#21B0FF" stroke-width="20"/>
+<path id="Vector_11" d="M106 300C126.14 242.511 161.53 191.578 208.384 152.65C255.238 113.723 311.794 88.2649 372 79" stroke="#63E9FF" stroke-width="14" stroke-linecap="round"/>
+<path id="Vector_12" opacity="0.8" d="M440.684 74.7659C481.634 76.9359 521.84 86.5836 559.316 103.232" stroke="#63E9FF" stroke-width="10" stroke-linecap="round"/>
+<path id="Vector_13" d="M420 720C590.104 720 728 582.104 728 412C728 241.896 590.104 104 420 104C249.896 104 112 241.896 112 412C112 582.104 249.896 720 420 720Z" fill="url(#inner-fill)"/>
+</g>
+<g id="sparkles">
+    <path id="star-1" transform="translate(272 268)" d="M 0 -40 C 7.199999999999999 -7.199999999999999 7.199999999999999 -7.199999999999999 40 0 C 7.199999999999999 7.199999999999999 7.199999999999999 7.199999999999999 0 40 C -7.199999999999999 7.199999999999999 -7.199999999999999 7.199999999999999 -40 0 C -7.199999999999999 -7.199999999999999 -7.199999999999999 -7.199999999999999 0 -40 Z" fill="#ffc83a"/>
+    <path id="star-2" transform="translate(647 369)" d="M 0 -34 C 6.12 -6.12 6.12 -6.12 34 0 C 6.12 6.12 6.12 6.12 0 34 C -6.12 6.12 -6.12 6.12 -34 0 C -6.12 -6.12 -6.12 -6.12 0 -34 Z" fill="#ffc83a"/>
+</g>
+<g id="protractor" transform="translate(474 637) rotate(8.5)">
+    <path d="M -228 0 A 228 228 0 0 1 228 0 Z M -107 -74 A 107 107 0 0 1 107 -74 Z" transform="translate(6 12)" fill="#1d4fd8" fill-rule="evenodd"/>
+    <path id="protractor-body" d="M -228 0 A 228 228 0 0 1 228 0 Z M -107 -74 A 107 107 0 0 1 107 -74 Z" fill="url(#pro-fill)" fill-rule="evenodd" stroke="url(#pro-fill)" stroke-width="8" stroke-linejoin="round"/>
+    <path d="M -198 -6 H 198" stroke="#7befff" stroke-width="4" stroke-linecap="round" opacity="0.5"/>
+    <path d="M -117 -74 A 117 117 0 0 1 -58.5 -175.3" stroke="#a6f0ff" stroke-width="5" stroke-linecap="round" opacity="0.6"/>
+    <path d="M -128.7 -128.7 A 182 182 0 0 1 -6.4 -181.9" stroke="#a6f0ff" stroke-width="7" stroke-linecap="round" opacity="0.55"/>
+    <g id="protractor-ticks">
+      <path d="M -214 0 L -184 0" stroke="#2a1f9e" stroke-width="4.5" stroke-linecap="round"/>
+      <path d="M -210.7 -37.2 L -194 -34.2" stroke="#2a1f9e" stroke-width="3.5" stroke-linecap="round"/>
+      <path d="M -201.1 -73.2 L -185.1 -67.4" stroke="#2a1f9e" stroke-width="3.5" stroke-linecap="round"/>
+      <path d="M -185.3 -107 L -159.3 -92" stroke="#2a1f9e" stroke-width="4.5" stroke-linecap="round"/>
+      <path d="M -163.9 -137.6 L -150.9 -126.6" stroke="#2a1f9e" stroke-width="3.5" stroke-linecap="round"/>
+      <path d="M -137.6 -163.9 L -126.6 -150.9" stroke="#2a1f9e" stroke-width="3.5" stroke-linecap="round"/>
+      <path d="M -107 -185.3 L -92 -159.3" stroke="#2a1f9e" stroke-width="4.5" stroke-linecap="round"/>
+      <path d="M -73.2 -201.1 L -67.4 -185.1" stroke="#2a1f9e" stroke-width="3.5" stroke-linecap="round"/>
+      <path d="M -37.2 -210.7 L -34.2 -194" stroke="#2a1f9e" stroke-width="3.5" stroke-linecap="round"/>
+      <path d="M -0 -214 L -0 -184" stroke="#2a1f9e" stroke-width="4.5" stroke-linecap="round"/>
+      <path d="M 37.2 -210.7 L 34.2 -194" stroke="#2a1f9e" stroke-width="3.5" stroke-linecap="round"/>
+      <path d="M 73.2 -201.1 L 67.4 -185.1" stroke="#2a1f9e" stroke-width="3.5" stroke-linecap="round"/>
+      <path d="M 107 -185.3 L 92 -159.3" stroke="#2a1f9e" stroke-width="4.5" stroke-linecap="round"/>
+      <path d="M 137.6 -163.9 L 126.6 -150.9" stroke="#2a1f9e" stroke-width="3.5" stroke-linecap="round"/>
+      <path d="M 163.9 -137.6 L 150.9 -126.6" stroke="#2a1f9e" stroke-width="3.5" stroke-linecap="round"/>
+      <path d="M 185.3 -107 L 159.3 -92" stroke="#2a1f9e" stroke-width="4.5" stroke-linecap="round"/>
+      <path d="M 201.1 -73.2 L 185.1 -67.4" stroke="#2a1f9e" stroke-width="3.5" stroke-linecap="round"/>
+      <path d="M 210.7 -37.2 L 194 -34.2" stroke="#2a1f9e" stroke-width="3.5" stroke-linecap="round"/>
+      <path d="M 214 -0 L 184 -0" stroke="#2a1f9e" stroke-width="4.5" stroke-linecap="round"/>
+    </g>
+    <g id="protractor-edge-ticks">
+      <path d="M -180 -12 V -38" stroke="#2a1f9e" stroke-width="4" stroke-linecap="round"/>
+      <path d="M -161 -12 V -26" stroke="#2a1f9e" stroke-width="3.2" stroke-linecap="round"/>
+      <path d="M -142 -12 V -26" stroke="#2a1f9e" stroke-width="3.2" stroke-linecap="round"/>
+      <path d="M -123 -12 V -26" stroke="#2a1f9e" stroke-width="3.2" stroke-linecap="round"/>
+      <path d="M -104 -12 V -26" stroke="#2a1f9e" stroke-width="3.2" stroke-linecap="round"/>
+      <path d="M -85 -12 V -38" stroke="#2a1f9e" stroke-width="4" stroke-linecap="round"/>
+      <path d="M -66 -12 V -26" stroke="#2a1f9e" stroke-width="3.2" stroke-linecap="round"/>
+      <path d="M -47 -12 V -26" stroke="#2a1f9e" stroke-width="3.2" stroke-linecap="round"/>
+      <path d="M -28 -12 V -26" stroke="#2a1f9e" stroke-width="3.2" stroke-linecap="round"/>
+      <path d="M -9 -12 V -26" stroke="#2a1f9e" stroke-width="3.2" stroke-linecap="round"/>
+      <path d="M 10 -12 V -38" stroke="#2a1f9e" stroke-width="4" stroke-linecap="round"/>
+      <path d="M 29 -12 V -26" stroke="#2a1f9e" stroke-width="3.2" stroke-linecap="round"/>
+      <path d="M 48 -12 V -26" stroke="#2a1f9e" stroke-width="3.2" stroke-linecap="round"/>
+      <path d="M 67 -12 V -26" stroke="#2a1f9e" stroke-width="3.2" stroke-linecap="round"/>
+      <path d="M 86 -12 V -26" stroke="#2a1f9e" stroke-width="3.2" stroke-linecap="round"/>
+      <path d="M 105 -12 V -38" stroke="#2a1f9e" stroke-width="4" stroke-linecap="round"/>
+      <path d="M 124 -12 V -26" stroke="#2a1f9e" stroke-width="3.2" stroke-linecap="round"/>
+      <path d="M 143 -12 V -26" stroke="#2a1f9e" stroke-width="3.2" stroke-linecap="round"/>
+      <path d="M 162 -12 V -26" stroke="#2a1f9e" stroke-width="3.2" stroke-linecap="round"/>
+      <path d="M 181 -12 V -26" stroke="#2a1f9e" stroke-width="3.2" stroke-linecap="round"/>
+      <path d="M 200 -12 V -38" stroke="#2a1f9e" stroke-width="4" stroke-linecap="round"/>
+    </g>
+  </g>
+<g id="ruler" transform="translate(388 404) rotate(-41.5)">
+    <rect x="-286.0" y="-36.0" width="580" height="96" rx="20" fill="#e87e00"/>
+    <rect id="ruler-body" x="-290.0" y="-48.0" width="580" height="96" rx="20" fill="url(#ruler-fill)"/>
+    <path d="M -264.0 -42.0 H 264.0" stroke="#fff3a6" stroke-width="5" stroke-linecap="round" opacity="0.9"/>
+    <rect x="220.0" y="-38.0" width="44" height="12" rx="6" fill="#fff8c8" opacity="0.9"/>
+    <g id="ruler-ticks">
+      <path d="M -228 -38.0 V -6.0" stroke="#2a1f9e" stroke-width="4.5" stroke-linecap="round"/>
+      <path d="M -214 -38.0 V -22.0" stroke="#2a1f9e" stroke-width="3.5" stroke-linecap="round"/>
+      <path d="M -200 -38.0 V -22.0" stroke="#2a1f9e" stroke-width="3.5" stroke-linecap="round"/>
+      <path d="M -186 -38.0 V -22.0" stroke="#2a1f9e" stroke-width="3.5" stroke-linecap="round"/>
+      <path d="M -172 -38.0 V -22.0" stroke="#2a1f9e" stroke-width="3.5" stroke-linecap="round"/>
+      <path d="M -158 -38.0 V -6.0" stroke="#2a1f9e" stroke-width="4.5" stroke-linecap="round"/>
+      <path d="M -144 -38.0 V -22.0" stroke="#2a1f9e" stroke-width="3.5" stroke-linecap="round"/>
+      <path d="M -130 -38.0 V -22.0" stroke="#2a1f9e" stroke-width="3.5" stroke-linecap="round"/>
+      <path d="M -116 -38.0 V -22.0" stroke="#2a1f9e" stroke-width="3.5" stroke-linecap="round"/>
+      <path d="M -102 -38.0 V -22.0" stroke="#2a1f9e" stroke-width="3.5" stroke-linecap="round"/>
+      <path d="M -88 -38.0 V -6.0" stroke="#2a1f9e" stroke-width="4.5" stroke-linecap="round"/>
+      <path d="M -74 -38.0 V -22.0" stroke="#2a1f9e" stroke-width="3.5" stroke-linecap="round"/>
+      <path d="M -60 -38.0 V -22.0" stroke="#2a1f9e" stroke-width="3.5" stroke-linecap="round"/>
+      <path d="M -46 -38.0 V -22.0" stroke="#2a1f9e" stroke-width="3.5" stroke-linecap="round"/>
+      <path d="M -32 -38.0 V -22.0" stroke="#2a1f9e" stroke-width="3.5" stroke-linecap="round"/>
+      <path d="M -18 -38.0 V -6.0" stroke="#2a1f9e" stroke-width="4.5" stroke-linecap="round"/>
+      <path d="M -4 -38.0 V -22.0" stroke="#2a1f9e" stroke-width="3.5" stroke-linecap="round"/>
+      <path d="M 10 -38.0 V -22.0" stroke="#2a1f9e" stroke-width="3.5" stroke-linecap="round"/>
+      <path d="M 24 -38.0 V -22.0" stroke="#2a1f9e" stroke-width="3.5" stroke-linecap="round"/>
+      <path d="M 38 -38.0 V -22.0" stroke="#2a1f9e" stroke-width="3.5" stroke-linecap="round"/>
+      <path d="M 52 -38.0 V -6.0" stroke="#2a1f9e" stroke-width="4.5" stroke-linecap="round"/>
+      <path d="M 66 -38.0 V -22.0" stroke="#2a1f9e" stroke-width="3.5" stroke-linecap="round"/>
+      <path d="M 80 -38.0 V -22.0" stroke="#2a1f9e" stroke-width="3.5" stroke-linecap="round"/>
+      <path d="M 94 -38.0 V -22.0" stroke="#2a1f9e" stroke-width="3.5" stroke-linecap="round"/>
+      <path d="M 108 -38.0 V -22.0" stroke="#2a1f9e" stroke-width="3.5" stroke-linecap="round"/>
+      <path d="M 122 -38.0 V -6.0" stroke="#2a1f9e" stroke-width="4.5" stroke-linecap="round"/>
+      <path d="M 136 -38.0 V -22.0" stroke="#2a1f9e" stroke-width="3.5" stroke-linecap="round"/>
+      <path d="M 150 -38.0 V -22.0" stroke="#2a1f9e" stroke-width="3.5" stroke-linecap="round"/>
+      <path d="M 164 -38.0 V -22.0" stroke="#2a1f9e" stroke-width="3.5" stroke-linecap="round"/>
+      <path d="M 178 -38.0 V -22.0" stroke="#2a1f9e" stroke-width="3.5" stroke-linecap="round"/>
+      <path d="M 192 -38.0 V -6.0" stroke="#2a1f9e" stroke-width="4.5" stroke-linecap="round"/>
+      <path d="M 206 -38.0 V -22.0" stroke="#2a1f9e" stroke-width="3.5" stroke-linecap="round"/>
+      <path d="M 220 -38.0 V -22.0" stroke="#2a1f9e" stroke-width="3.5" stroke-linecap="round"/>
+      <path d="M 234 -38.0 V -22.0" stroke="#2a1f9e" stroke-width="3.5" stroke-linecap="round"/>
+      <path d="M 248 -38.0 V -22.0" stroke="#2a1f9e" stroke-width="3.5" stroke-linecap="round"/>
+      <path d="M 262 -38.0 V -6.0" stroke="#2a1f9e" stroke-width="4.5" stroke-linecap="round"/>
+    </g>
+    <g id="hole">
+      <circle cx="-256.0" cy="18.0" r="15" fill="#e87e00"/>
+      <circle cx="-256.0" cy="18.0" r="11" fill="#170a66"/>
+    </g>
+  </g>
+</g>
+</svg>

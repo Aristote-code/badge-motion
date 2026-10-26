@@ -1,0 +1,452 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Badge Motion</title>
+<meta name="description" content="Six achievement badges: illustrated in SVG, animated with sound and haptics.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="icon" href="badges/rocket/rocket-badge.svg">
+<style>
+  :root {
+    --bg: #0b0a16; --bg2: #121027; --card: #15132e; --card2: #1b1840; --line: rgba(255,255,255,.07); --line2: rgba(255,255,255,.12);
+    --text: #f2efff; --muted: #a7a2c9; --dim: #6f6a96;
+    --gold: #ffc83a; --gold2: #f59204; --blue: #1d8bfe; --cyan: #3ee4ff; --violet: #8f7bff;
+    --radius: 22px;
+  }
+  * { box-sizing: border-box; }
+  html { background: var(--bg); }
+  body {
+    margin: 0; color: var(--text); font: 15px/1.55 Inter, system-ui, -apple-system, sans-serif;
+    background:
+      radial-gradient(1200px 600px at 50% -10%, rgba(126, 87, 232, .22), transparent 60%),
+      radial-gradient(800px 500px at 100% 0%, rgba(29, 139, 254, .12), transparent 60%),
+      var(--bg);
+    min-height: 100vh;
+  }
+  body::before { /* soft star field */
+    content: ""; position: fixed; inset: 0; pointer-events: none; opacity: .5;
+    background-image:
+      radial-gradient(1.5px 1.5px at 12% 18%, #fff8 50%, transparent 51%), radial-gradient(1px 1px at 82% 12%, #fff6 50%, transparent 51%),
+      radial-gradient(1.5px 1.5px at 66% 42%, #ffd27a88 50%, transparent 51%), radial-gradient(1px 1px at 30% 70%, #fff5 50%, transparent 51%),
+      radial-gradient(1.5px 1.5px at 90% 78%, #8af2ff77 50%, transparent 51%), radial-gradient(1px 1px at 46% 90%, #fff5 50%, transparent 51%),
+      radial-gradient(1px 1px at 6% 52%, #fff4 50%, transparent 51%), radial-gradient(1.5px 1.5px at 56% 8%, #fff6 50%, transparent 51%);
+  }
+  a { color: inherit; }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 0 24px; }
+  h1, h2, h3, .brand { font-family: Nunito, Inter, system-ui, sans-serif; letter-spacing: -.01em; }
+
+  /* ---------- header ---------- */
+  header.top { padding: 28px 0 8px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+  .brand { display: flex; align-items: center; gap: 12px; font-weight: 900; font-size: 19px; text-decoration: none; }
+  .brand-mark { width: 38px; height: 38px; }
+  .top-links { display: flex; gap: 8px; color: var(--muted); font-size: 13px; }
+  .pill { border: 1px solid var(--line2); border-radius: 999px; padding: 6px 12px; background: rgba(255,255,255,.03); white-space: nowrap; }
+
+  .hero { padding: 56px 0 34px; text-align: center; }
+  .hero h1 { font-size: clamp(38px, 6vw, 68px); line-height: 1.02; margin: 0 0 16px; font-weight: 900; }
+  .hero h1 .grad { background: linear-gradient(92deg, var(--gold) 0%, #ff9d5c 35%, var(--violet) 70%, var(--cyan) 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .hero p { color: var(--muted); font-size: 17px; max-width: 620px; margin: 0 auto 26px; }
+  .chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+  .chip { display: inline-flex; align-items: center; gap: 7px; font-size: 13px; color: var(--text); border: 1px solid var(--line2); background: rgba(255,255,255,.04); padding: 7px 13px; border-radius: 999px; }
+  .chip i { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
+
+  /* ---------- filters ---------- */
+  .filters { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; padding: 8px 0 0; }
+  .filters button { display: inline-flex; align-items: center; gap: 7px; cursor: pointer; font: 600 13px Inter, sans-serif; color: var(--muted); background: rgba(255,255,255,.04); border: 1px solid var(--line2); border-radius: 999px; padding: 7px 14px; }
+  .filters button i { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+  .filters button[aria-pressed="true"] { color: var(--text); background: rgba(255,255,255,.12); border-color: rgba(255,255,255,.25); }
+  .card[hidden] { display: none; }
+  /* ---------- gallery ---------- */
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; padding: 26px 0 70px; }
+  @media (max-width: 980px) { .grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 620px) { .grid { grid-template-columns: 1fr; } .wrap { padding: 0 16px; } .top-links { display: none; } }
+  .card {
+    position: relative; display: block; text-decoration: none; border-radius: var(--radius); overflow: hidden;
+    background: linear-gradient(180deg, var(--card2), var(--card)); border: 1px solid var(--line);
+    transition: transform .35s cubic-bezier(.2,.8,.2,1), border-color .35s, box-shadow .35s;
+  }
+  .card:hover, .card:focus-visible { transform: translateY(-6px); border-color: rgba(255, 200, 58, .35); box-shadow: 0 24px 60px -20px rgba(126, 87, 232, .55); outline: none; }
+  .media { position: relative; aspect-ratio: 1; background: #14131a; }
+  .media video, .media img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+  .media .intro { opacity: 0; transition: opacity .25s; }
+  .card.playing .media .intro { opacity: 1; }
+  .num { position: absolute; top: 14px; left: 14px; font: 800 12px/1 Nunito, sans-serif; color: var(--muted); background: rgba(11,10,22,.65); border: 1px solid var(--line2); padding: 6px 9px; border-radius: 999px; backdrop-filter: blur(6px); }
+  .hover-hint { position: absolute; bottom: 14px; right: 14px; font-size: 12px; color: var(--text); background: rgba(11,10,22,.7); border: 1px solid var(--line2); padding: 6px 10px; border-radius: 999px; opacity: 0; transform: translateY(6px); transition: .3s; }
+  .card:hover .hover-hint { opacity: 1; transform: none; }
+  .meta { padding: 16px 18px 18px; }
+  .meta h3 { margin: 0 0 4px; font-size: 21px; font-weight: 900; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .meta h3 small { font: 600 12px Inter, sans-serif; color: var(--dim); }
+  .meta p { margin: 0; color: var(--muted); font-size: 14px; }
+
+  /* ---------- detail ---------- */
+  .detail { display: none; padding: 18px 0 70px; }
+  body.show-detail .detail { display: block; }
+  body.show-detail .home { display: none; }
+  .dbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 0 22px; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px; cursor: pointer; text-decoration: none; font: 600 14px Inter, sans-serif;
+    color: var(--text); background: rgba(255,255,255,.05); border: 1px solid var(--line2); border-radius: 12px; padding: 9px 14px; transition: .2s;
+  }
+  .btn:hover { background: rgba(255,255,255,.1); border-color: rgba(255,255,255,.22); }
+  .btn.primary { background: linear-gradient(180deg, #ffd760, #f5a514); color: #2a1600; border-color: transparent; }
+  .btn.primary:hover { filter: brightness(1.06); }
+  .btn svg { width: 16px; height: 16px; }
+  .nav-btns { display: flex; gap: 8px; }
+
+  .dgrid { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr); gap: 28px; align-items: start; }
+  @media (max-width: 900px) { .dgrid { grid-template-columns: 1fr; } }
+  .player { position: sticky; top: 18px; border-radius: 26px; overflow: hidden; background: #14131a; border: 1px solid var(--line2); box-shadow: 0 40px 80px -40px rgba(0,0,0,.8); }
+  @media (max-width: 900px) { .player { position: relative; top: 0; } }
+  .stage { position: relative; aspect-ratio: 1; }
+  .stage iframe, .stage video { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; display: block; background: #14131a; }
+  .pctrl { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px; border-top: 1px solid var(--line); flex-wrap: wrap; }
+  .seg { display: inline-flex; background: rgba(255,255,255,.05); border: 1px solid var(--line2); border-radius: 12px; padding: 3px; }
+  .seg button { border: 0; background: none; color: var(--muted); font: 600 13px Inter, sans-serif; padding: 7px 12px; border-radius: 9px; cursor: pointer; }
+  .seg button[aria-pressed="true"] { background: rgba(255,255,255,.12); color: var(--text); }
+  .hint { color: var(--dim); font-size: 12.5px; padding: 0 14px 12px; }
+
+  .info h2 { font-size: clamp(32px, 4vw, 46px); margin: 0 0 6px; font-weight: 900; line-height: 1.05; }
+  .kicker { color: var(--gold); font: 800 13px Nunito, sans-serif; text-transform: uppercase; letter-spacing: .12em; }
+  .lede { color: var(--muted); font-size: 16px; margin: 10px 0 18px; }
+  .facts { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 26px; }
+  .section { background: rgba(255,255,255,.03); border: 1px solid var(--line); border-radius: 18px; padding: 18px; margin-bottom: 16px; }
+  .section h3 { margin: 0 0 12px; font-size: 16px; font-weight: 800; color: var(--text); display: flex; align-items: center; gap: 8px; }
+  .beats { list-style: none; margin: 0; padding: 0; position: relative; }
+  .beats::before { content: ""; position: absolute; left: 33px; top: 8px; bottom: 8px; width: 2px; background: linear-gradient(var(--gold), var(--violet), var(--cyan)); opacity: .35; border-radius: 2px; }
+  .beat { display: grid; grid-template-columns: 66px 1fr; gap: 12px; padding: 7px 0; position: relative; }
+  .beat time { font: 800 12px Nunito, sans-serif; color: #1a1033; background: var(--gold); border-radius: 999px; padding: 3px 0; text-align: center; align-self: start; position: relative; z-index: 1; }
+  .beat.idle time { background: var(--cyan); }
+  .beat b { display: block; font-weight: 600; font-size: 14.5px; }
+  .beat span { color: var(--muted); font-size: 13px; }
+  .tags { display: flex; flex-wrap: wrap; gap: 6px; }
+  .tag { font: 500 12.5px ui-monospace, SFMono-Regular, Menlo, monospace; color: #cfe9ff; background: rgba(29,139,254,.12); border: 1px solid rgba(29,139,254,.28); border-radius: 8px; padding: 4px 8px; }
+  .dl { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .dl a { display: flex; align-items: center; justify-content: space-between; gap: 8px; text-decoration: none; background: rgba(255,255,255,.04); border: 1px solid var(--line2); border-radius: 12px; padding: 10px 12px; transition: .2s; }
+  .dl a:hover { background: rgba(255,255,255,.09); }
+  .dl a b { font-weight: 600; font-size: 13.5px; }
+  .dl a small { color: var(--dim); font-size: 11.5px; }
+
+  footer { color: var(--dim); font-size: 13px; text-align: center; padding: 10px 0 40px; }
+  footer a { color: var(--muted); }
+  @media (prefers-reduced-motion: reduce) { .card, .card:hover { transition: none; transform: none; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="#/">
+      <svg class="brand-mark" viewBox="0 0 40 40" aria-hidden="true">
+        <defs><linearGradient id="bm" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ffd760"/><stop offset="1" stop-color="#f59204"/></linearGradient></defs>
+        <g stroke="#ffc83a" stroke-width="2" stroke-linecap="round" opacity=".55">
+          <path d="M20 2v5M20 33v5M2 20h5M33 20h5M7 7l3.5 3.5M29.5 29.5L33 33M7 33l3.5-3.5M29.5 10.5L33 7"/>
+        </g>
+        <circle cx="20" cy="20" r="10.5" fill="#1d8bfe"/><circle cx="20" cy="20" r="7.5" fill="#14074f"/>
+        <path d="M20 14.5l1.6 3.9 4.1.3-3.2 2.6 1 4-3.5-2.2-3.5 2.2 1-4-3.2-2.6 4.1-.3z" fill="url(#bm)"/>
+      </svg>
+      Badge Motion
+    </a>
+    <div class="top-links"><span class="pill" id="count-pill">15 badges</span><span class="pill">SVG · Sound · Haptics</span></div>
+  </header>
+
+  <main class="home">
+    <section class="hero">
+      <h1>Achievement badges that <span class="grad">feel earned</span></h1>
+      <p>Fifteen badges, each drawn as clean, editable SVG and brought to life with its own little story, then finished with Duolingo-style sound, matching haptics, confetti and light rays.</p>
+      <div class="chips">
+        <span class="chip"><i style="background:var(--gold)"></i>60 fps</span>
+        <span class="chip"><i style="background:var(--violet)"></i>Synthesised sound</span>
+        <span class="chip"><i style="background:var(--cyan)"></i>iOS + Android haptics</span>
+        <span class="chip"><i style="background:#4ff0a8"></i>Seamless idle loops</span>
+      </div>
+    </section>
+    <div class="filters" role="group" aria-label="Filter by colour">
+      <button data-f="all" aria-pressed="true">All</button><button data-f="blue" aria-pressed="false"><i style="background:#1d8bfe"></i>Blue</button><button data-f="red" aria-pressed="false"><i style="background:#f0303a"></i>Red</button><button data-f="green" aria-pressed="false"><i style="background:#34c83a"></i>Green</button><button data-f="purple" aria-pressed="false"><i style="background:#8a63f0"></i>Purple</button>
+    </div>
+    <section class="grid" id="grid" aria-label="Badges"></section>
+  </main>
+
+  <main class="detail" id="detail" aria-live="polite">
+    <div class="dbar">
+      <a class="btn" href="#/" id="back"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M10 3L5 8l5 5"/></svg>All badges</a>
+      <div class="nav-btns">
+        <a class="btn" id="prev" aria-label="Previous badge"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M10 3L5 8l5 5"/></svg></a>
+        <a class="btn" id="next" aria-label="Next badge"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 3l5 5-5 5"/></svg></a>
+      </div>
+    </div>
+    <div class="dgrid">
+      <div>
+        <div class="player">
+          <div class="stage" id="stage"></div>
+          <div class="pctrl">
+            <div class="seg" role="group" aria-label="View">
+              <button data-view="live" aria-pressed="true">Live</button>
+              <button data-view="intro" aria-pressed="false">Intro video</button>
+              <button data-view="loop" aria-pressed="false">Idle loop</button>
+            </div>
+            <button class="btn primary" id="replay"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M4 2.8v10.4c0 .6.7 1 1.2.6l8-5.2c.4-.3.4-1 0-1.2l-8-5.2C4.7 1.8 4 2.2 4 2.8z"/></svg>Replay</button>
+          </div>
+          <div class="hint" id="hint">Live view: click the badge itself to replay with sound (and haptics on Android).</div>
+        </div>
+      </div>
+      <div class="info" id="info"></div>
+    </div>
+  </main>
+
+  <footer>Illustrated, animated and sound-designed badge set · motion style inspired by Adrian Kuleszo's badge animations</footer>
+</div>
+
+<script>
+const BADGES = [
+  {
+    id: 'rocket', theme: 'purple', title: 'Rocket Launch', kicker: 'Lift-off', intro: 6.0,
+    lede: 'The shield pops in, the rocket blasts across on a rising scale with its trails growing behind it, then lands with a ta-da, confetti and a burst of light rays.',
+    beats: [
+      ['0.0s', 'Shield pops in', 'marimba boop · tap'],
+      ['0.3s', 'Rocket flies in, trails grow', 'rising C–E–G–C over a slide-whistle glide · building rumble'],
+      ['0.85s', 'Landing: rings, confetti, light rays', '"ta-da!" chord · strong hit'],
+      ['1.0s', 'Window sparkle', 'crystal ting · crisp tap'],
+      ['1.25s', 'Shine sweep', 'harp glissando'],
+      ['idle', 'Rocket bobs, flame flickers, speed lines flow, rays turn', 'shine once per loop']
+    ],
+    layers: ['badge', 'shield', 'inner', 'sky-stars', 'inner-line', 'trails', 'speed-lines', 'rocket', 'rocket-outline', 'flame', 'spark']
+  },
+  {
+    id: 'compass', theme: 'blue', title: 'Pathfinder', kicker: 'Steps 1 · 2 · 3', intro: 7.1,
+    lede: 'The medal and ribbons drop in, the compass needle whirls and clicks into place, then the path draws itself: step 1, 2, 3 and the arrow, each on a rising bell.',
+    beats: [
+      ['0.0s', 'Medal pops, ribbons drop and swing', 'boop + soft flap · taps'],
+      ['0.36s', 'Compass pops in, ticks and rose spin in', 'tick run'],
+      ['0.5s', 'Needle whirls… and settles at 1.08s', 'slowing whirr, woody click · fading buzz, crisp tap'],
+      ['1.4s', 'Path draws: 1 → 2 → 3 → arrow', 'C–E–G–C bells · taps getting stronger'],
+      ['2.1s', 'Loop complete: rings, confetti, rays', '"ta-da!" chord · strong hit'],
+      ['idle', 'A glowing dot travels the loop; each step bounces as it passes', 'shine once per loop']
+    ],
+    layers: ['badge', 'medal', 'ribbon-left', 'ribbon-right', 'track', 'arrow', 'marker-1', 'marker-2', 'marker-3', 'compass', 'face', 'ticks', 'rose', 'needle']
+  },
+  {
+    id: 'abacus', theme: 'blue', title: 'Count It', kicker: 'Counting 1 to 9', intro: 7.3,
+    lede: 'The abacus pops in with a twist and nine beads slide in along their rods one by one, each with a woody clack counting up the scale, before + and − pop in.',
+    beats: [
+      ['0.34s', 'Abacus frame pops in', 'boop · tap'],
+      ['0.62s', 'Nine beads slide in, row by row', 'a clack per bead, counting up · ticks'],
+      ['1.84s', '+ then − pop in', 'high bell, answered lower · taps'],
+      ['2.26s', 'Sum complete: rings, confetti, rays', '"ta-da!" chord · strong hit'],
+      ['2.34s', 'Sparkle stars burst in', 'three quick tings'],
+      ['idle', 'Beads flick along their rods in a counting wave', 'shine once per loop']
+    ],
+    layers: ['badge', 'medal', 'ribbon-left', 'ribbon-right', 'abacus', 'frame', 'row-1', 'row-2', 'row-3', 'plus', 'minus', 'sparkles']
+  },
+  {
+    id: 'shapes', theme: 'blue', title: 'Shape Shift', kicker: 'Round the cycle', intro: 7.6,
+    lede: 'Triangle, circle and square pop in with their own voices, the arrows draw on, and the shapes hop three times around the cycle, spinning as they go, before landing back home.',
+    beats: [
+      ['0.42s', 'Triangle · circle · square pop in', 'ting · round boop · woody tok'],
+      ['1.0s', 'Both arrows draw on, heads pop', 'quick harp runs · light taps'],
+      ['1.62s', 'Three hops around the cycle', '"whee" landing on C, E, G · building buzz + taps'],
+      ['2.6s', 'Cycle complete: shape-shaped confetti, rays', '"ta-da!" chord · strong hit'],
+      ['idle', 'Triangle wobbles, square quarter-turns, circle bounces', 'shine once per loop']
+    ],
+    layers: ['badge', 'medal', 'ribbon-left', 'ribbon-right', 'triangle', 'circle', 'square', 'arrow-top', 'arrow-left', 'sparkles']
+  },
+  {
+    id: 'measure', theme: 'blue', title: 'Measure Up', kicker: 'Ruler + protractor', intro: 7.5,
+    lede: 'The protractor swings in and its dial ticks sweep on, the ruler slides into place and counts up like a tape measure, then a glint runs along it: measured!',
+    beats: [
+      ['0.36s', 'Protractor swings in, dial ticks sweep on', 'woody swing, clockwork run'],
+      ['0.95s', 'Ruler slides in along its length', 'rising glide landing on a note · tap'],
+      ['1.4s', 'Ruler ticks count up hole → tip', 'measuring-tape "zip" · building buzz'],
+      ['2.04s', 'A glint runs along the ruler', '"measured!" ting · crisp tap'],
+      ['2.5s', 'Complete: rings, confetti, rays', '"ta-da!" chord · strong hit'],
+      ['idle', 'Glint repeats, ticks ripple, tools rock gently', 'shine once per loop']
+    ],
+    layers: ['badge', 'medal', 'ribbon-left', 'ribbon-right', 'protractor', 'protractor-body', 'protractor-ticks', 'protractor-edge-ticks', 'ruler', 'ruler-body', 'ruler-ticks', 'sparkles']
+  },
+  {
+    id: 'insight', theme: 'blue', title: 'Insight', kicker: 'Growth, examined', intro: 8.7,
+    lede: 'The bars grow up from the baseline one by one, the trend line draws dot to dot over them to its peak, then the magnifier zooms in and probes around with a real, live magnifying lens.',
+    beats: [
+      ['0.36s', 'Baseline draws left → right', 'soft pluck sweep'],
+      ['0.56s', 'Bars grow one by one', 'rising "bloop" per bar · buzz + landing tap'],
+      ['1.18s', 'Trend line draws node by node, peak pings', 'climbing plucks, "ping!" · light ticks, crisp tap'],
+      ['2.08s', 'Magnifier zooms in and probes bar → line → peak', 'glide, "blip-blip" at each stop · taps'],
+      ['3.62s', 'Complete: rings, confetti, rays', '"ta-da!" chord · strong hit'],
+      ['idle', 'Magnifier hovers in a figure-8, lens magnifies live', 'shine once per loop']
+    ],
+    layers: ['badge', 'medal', 'graph', 'baseline', 'bars', 'line-path', 'nodes', 'target', 'target-ring', 'loupe', 'lens', 'lens-view', 'sparkles']
+  }  ,
+  { id: 'code-cracker', theme: 'blue', title: 'Code Cracker', kicker: 'Unlocked', intro: 4.0,
+    lede: 'Three dials spin like slot reels and land one by one on ● ▲ ★, the latch clicks and the shackle springs open.',
+    beats: [['0.32s', 'Padlock drops in, closed', 'woody boop · tap'], ['0.68s', 'Three reels start rolling', 'rising woody ticks · light buzz'], ['1.34s', '● then ▲ land', 'thunks on C5, E5 · taps'], ['2.06s', '★ lands last with a glow', 'G5 thunk + shimmer · strongest tap'], ['2.4s', 'Shackle springs up and swings open', '"ka-chunk" + bell · strong hit'], ['idle', 'Dials nudge in turn, shackle wobbles', 'shine once per loop']],
+    layers: ['padlock', 'shackle', 'lock-body', 'dial-window', 'dials', 'dial-glow', 'bursts', 'sparkles'] },
+  { id: 'bookworm', theme: 'red', title: 'Bookworm', kicker: 'Page turner', intro: 4.42,
+    lede: 'The book lands, swings open, its pages fan up and four leaves flip over before the bookmark drops and a star rises out of the gutter.',
+    beats: [['0.34s', 'Closed book drops in and lands', 'soft woody thump · tap'], ['0.9s', 'Covers open, pages fan up', 'woody notes + airy shimmer · buzz'], ['1.52s', 'Four leaves flip right → left', 'paper "fff" + rising plucks · ticks'], ['2.38s', 'Bookmark unfurls', 'slide onto a tok · tap'], ['2.74s', 'Star rises out of the book', 'glide + bell · crisp tap'], ['idle', 'A page turns every loop, star twinkles', 'shine once per loop']],
+    layers: ['book', 'spine', 'cover-left', 'cover-right', 'pages-left', 'pages-right', 'leaves', 'bookmark', 'star', 'burst'] },
+  { id: 'wordsmith', theme: 'red', title: 'Wordsmith', kicker: 'Ink & flourish', intro: 4.48,
+    lede: 'Paper slides in, the fountain pen swoops down and writes a calligraphic flourish with its nib riding the end of the line, then dots it.',
+    beats: [['0.34s', 'Paper slides in, corner curls', 'whoosh + pluck run'], ['0.86s', 'Pen swoops in', 'falling glide · tap'], ['1.32s', 'Pen writes the flourish (nib follows the line)', 'rising glissando · light buzz'], ['2.52s', 'Full stop: ink dot plops', 'plip · tap'], ['3.06s', 'Star pops, glint runs along the ink', 'bell · crisp tap'], ['idle', 'Pen hovers, ink glints, star twinkles', 'shine once per loop']],
+    layers: ['paper', 'paper-sheet', 'paper-curl', 'ink', 'ink-path', 'ink-dot', 'pen', 'nib', 'star', 'burst'] },
+  { id: 'grammar-guardian', theme: 'red', title: 'Grammar Guardian', kicker: 'On guard', intro: 4.32,
+    lede: 'The shield pops in, its wings unfurl and flap twice, then the exclamation mark drops in with a bouncy ding-ding.',
+    beats: [['0.38s', 'Shield pops in', 'woody boop · tap'], ['0.72s', 'Wings unfurl, feather rows fan out', 'airy rising plucks · buzz'], ['1.52s', 'Two flaps', 'soft "fwup" · light buzz'], ['2.22s', '"!" drops and lands, then its dot', 'ding E6 → A6 · crisp taps'], ['2.92s', 'Star and burst dashes', 'sparkly plucks'], ['idle', 'Wings flap gently, "!" bobs', 'shine once per loop']],
+    layers: ['shield', 'wing-left', 'wing-right', 'exclaim', 'exclaim-bar', 'exclaim-dot', 'burst', 'sparkles'] },
+  { id: 'golden-mic', theme: 'green', title: 'Golden Mic', kicker: 'Take the stage', intro: 4.94,
+    lede: 'The stand rises, the mic drops into its yoke and rocks upright on the pivots, taps twice, then sings a little melody with the sound waves pulsing in time.',
+    beats: [['0.4s', 'Base pops, stand grows up', 'thump + rising glide'], ['1.08s', 'Mic drops into the yoke, rocks upright', 'clunk + click · firm tap'], ['2.04s', '"Tap tap"', 'muffled taps'], ['2.44s', 'Mic sings G5–C6–E6–G6, waves pulse', 'sung melody · tap per note'], ['3.7s', 'Gem sparkles', 'two tings'], ['idle', 'Mic sways on its pivot, waves pulse on the beat', 'shine once per loop']],
+    layers: ['base', 'stand', 'yoke', 'gem', 'mic', 'mic-grille', 'knobs', 'waves-left', 'waves-right', 'sparkles'] },
+  { id: 'chatterbox', theme: 'green', title: 'Chatterbox', kicker: 'Good conversation', intro: 4.48,
+    lede: 'Two speech bubbles pop in, the typing dots bounce, and the smiley bubble bursts into a laugh with two happy hops.',
+    beats: [['0.42s', 'Smiley bubble pops in', 'boop · tap'], ['0.92s', 'Typing bubble pops in', 'higher boop · tap'], ['1.3s', 'Typing dots bounce in two waves', 'soft plinks · light ticks'], ['2.26s', 'Face squeezes into a laugh, two "ha" hops', 'rising marimba + bell pairs · double tap'], ['3.04s', 'Burst dashes pop', 'pluck run'], ['idle', 'Bubbles float, dots wave, a little "ha-ha"', 'shine once per loop']],
+    layers: ['bubble-yellow', 'face', 'eyes-open', 'eyes-happy', 'mouth-smile', 'mouth-laugh', 'bubble-purple', 'typing-dots', 'burst'] },
+  { id: 'pen-pal', theme: 'green', title: 'Pen Pal', kicker: 'You’ve got mail', intro: 4.8,
+    lede: 'A sealed envelope flies in, the seal pops, the flap flips open and the letter rises out, writes its lines and its heart beats.',
+    beats: [['0.34s', 'Closed envelope flies in and lands', 'swoosh + paper tap · tap'], ['1.0s', 'Seal pops, flap flips open', '"fwip" · light tap'], ['1.6s', 'Letter slides up out of the pocket', 'smooth glide · light buzz'], ['2.12s', 'Lines write on', 'soft ticks'], ['2.7s', 'Heart pops and beats twice', 'warm "ba-dum" · heartbeat taps'], ['idle', 'Heart beats, letter bobs', 'shine once per loop']],
+    layers: ['envelope', 'envelope-back', 'flap-open', 'flap-closed', 'seal', 'letter', 'letter-lines', 'heart', 'pocket', 'burst'] },
+  { id: 'globetrotter', theme: 'green', title: 'Globetrotter', kicker: 'Around the world', intro: 5.44,
+    lede: 'The globe spins, two pins drop with the route drawing between them, and the plane takes off and flies all the way around the globe.',
+    beats: [['0.28s', 'Globe pops in and spins', 'boop + slowing whirr'], ['1.22s', 'Pin 1 drops', 'plink C6 · tap'], ['1.6s', 'Route draws dash by dash', 'climbing ticks'], ['2.12s', 'Pin 2 drops', 'plink G6 · tap'], ['2.6s', 'Plane flies around the globe (behind it on the far side)', 'airplane glide · light buzz'], ['idle', 'Continents drift, plane bobs, pins hop', 'shine once per loop']],
+    layers: ['globe', 'continents', 'ring-back', 'ring-front', 'route', 'pin-1', 'pin-2', 'flight-path', 'plane', 'sparkles'] },
+  { id: 'spelling-wizard', theme: 'red', title: 'Spelling Wizard', kicker: 'A · B · C', intro: 4.18,
+    lede: 'The letter tiles drop in one by one, the C flips from cream to gold, and a magic swoosh wraps around them with a star riding its tip.',
+    beats: [['0.42s', 'A, B, C drop in one by one', 'clack + C5 / E5 / G5 · taps'], ['1.44s', 'C flips cream → gold', '"fwip" + bell · tap'], ['1.98s', 'Swoosh draws around the tiles', 'harp glissando + shimmer · buzz'], ['2.88s', 'Star pops on the swoosh', 'bell · crisp tap'], ['3.16s', 'Finale: rings, confetti, rays', '"ta-da!" chord'], ['idle', 'Tiles hop in a wave, glint runs along the swoosh', 'shine once per loop']],
+    layers: ['tiles', 'tile-a', 'tile-b', 'tile-c', 'swoosh-back', 'swoosh-front', 'magic-star', 'burst'] },
+  { id: 'memory-keeper', theme: 'purple', title: 'Memory Keeper', kicker: 'Elephants never forget', intro: 3.98,
+    lede: 'A baby elephant peeks up over the edge of the hexagon, slaps its paws on the rim, flaps its ears open, blinks happily, then waves its raised trunk and trumpets three little notes.',
+    beats: [['0.32s', 'Elephant peeks up from behind the bottom edge', 'low rising glide'], ['0.46s', 'Paws slap onto the rim', 'two woody pats · taps'], ['0.92s', 'Ears flap open', 'airy flap + woody notes · buzz'], ['1.42s', 'Happy double blink, brows lift', 'tiny "tink" · taps'], ['1.6s', 'Trunk waves hello, then "toot-toot!"', 'friendly trumpet · buzz + tap'], ['2.22s', 'Three gold notes drift out of the trunk', 'G5 / B5 / D6 plinks'], ['2.36s', 'Burst wedges pop', 'bright pings'], ['2.95s', 'Finale: rings, confetti, rays', '"ta-da!" chord'], ['idle', 'Ears fan, trunk sways, paws tap, one blink per loop', 'shine once per loop']],
+    layers: ['rise', 'ear-left', 'ear-right', 'head', 'trunk', 'mouth', 'eye-left', 'eye-right', 'brows', 'paw-left', 'paw-right', 'burst'] }
+];
+const DOWNLOADS = [
+  ['svg', 'Artwork', 'SVG', b => `${b}-badge.svg`],
+  ['intro', 'Intro video', 'MP4 · sound', b => `${b}-badge-intro.mp4`],
+  ['loop', 'Idle loop', 'MP4 · seamless', b => `${b}-badge-idle-loop.mp4`],
+  ['png', 'Still', 'PNG', b => `${b}-badge.png`],
+  ['wav', 'Sound', 'WAV', b => `${b}-badge-sound.wav`],
+  ['ahap', 'iOS haptics', 'AHAP', b => `${b}-badge.ahap`],
+  ['kt', 'Android haptics', 'Kotlin', b => `${b}-badge-haptics-android.kt`],
+  ['json', 'Haptic timeline', 'JSON', b => `${b}-badge-haptics.json`]
+];
+const path = (b, f) => `badges/${b}/${f}`;
+const $ = s => document.querySelector(s);
+
+// ---------- gallery ----------
+const grid = $('#grid');
+BADGES.forEach((b, i) => {
+  const a = document.createElement('a');
+  a.className = 'card'; a.href = `#/${b.id}`; a.dataset.theme = b.theme;
+  a.innerHTML = `
+    <div class="media">
+      <img src="${path(b.id, b.id + '-badge.png')}" alt="" loading="lazy">
+      <video class="loop" muted loop playsinline preload="none" poster="${path(b.id, b.id + '-badge.png')}" src="${path(b.id, b.id + '-badge-idle-loop.mp4')}"></video>
+      <video class="intro" muted playsinline preload="none" src="${path(b.id, b.id + '-badge-intro.mp4')}"></video>
+      <span class="num">${String(i + 1).padStart(2, '0')}</span>
+      <span class="hover-hint">Playing intro…</span>
+    </div>
+    <div class="meta"><h3>${b.title}<small>${b.intro.toFixed(1)}s intro</small></h3><p>${b.kicker}</p></div>`;
+  const intro = a.querySelector('.intro'), loop = a.querySelector('.loop');
+  a.addEventListener('mouseenter', () => { a.classList.add('playing'); intro.currentTime = 0; intro.play().catch(() => {}); });
+  a.addEventListener('mouseleave', () => { a.classList.remove('playing'); intro.pause(); });
+  intro.addEventListener('ended', () => a.classList.remove('playing'));
+  grid.appendChild(a);
+});
+document.querySelectorAll('.filters button').forEach(btn => btn.addEventListener('click', () => {
+  document.querySelectorAll('.filters button').forEach(x => x.setAttribute('aria-pressed', x === btn));
+  document.querySelectorAll('.card').forEach(c => { c.hidden = btn.dataset.f !== 'all' && c.dataset.theme !== btn.dataset.f; });
+}));
+// play idle loops only while cards are on screen
+const io = new IntersectionObserver(es => es.forEach(e => {
+  const v = e.target.querySelector('video.loop');
+  if (e.isIntersecting) v.play().catch(() => {}); else v.pause();
+}), { rootMargin: '100px' });
+document.querySelectorAll('.card').forEach(c => io.observe(c));
+// browsers pause muted videos in background tabs; resume the visible ones when the tab comes back
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState !== 'visible' || current) return;
+  document.querySelectorAll('.card').forEach(c => { const r = c.getBoundingClientRect(); if (r.bottom > 0 && r.top < innerHeight) c.querySelector('video.loop').play().catch(() => {}); });
+});
+
+// ---------- detail ----------
+let current = null, view = 'live';
+function setView(v) {
+  view = v;
+  document.querySelectorAll('.seg button').forEach(btn => btn.setAttribute('aria-pressed', btn.dataset.view === v));
+  const b = current, stage = $('#stage');
+  stage.replaceChildren();
+  if (v === 'live') {
+    const f = document.createElement('iframe');
+    f.src = path(b.id, `${b.id}-badge.html?embed=1`);
+    f.title = `${b.title}: live animation`;
+    f.allow = 'autoplay';
+    stage.appendChild(f);
+    $('#hint').textContent = 'Live view: click the badge itself to replay with sound (and haptics on Android).';
+  } else {
+    const vid = document.createElement('video');
+    vid.src = path(b.id, `${b.id}-badge-${v === 'intro' ? 'intro' : 'idle-loop'}.mp4`);
+    vid.poster = path(b.id, `${b.id}-badge.png`);
+    vid.controls = true; vid.playsInline = true; vid.autoplay = true; vid.loop = v === 'loop';
+    stage.appendChild(vid);
+    $('#hint').textContent = v === 'intro' ? 'The rendered intro video, with sound (unmute to hear it).' : 'The seamless 4-second idle loop, as rendered for apps and social.';
+  }
+}
+function replay() {
+  const f = $('#stage iframe'), v = $('#stage video');
+  if (f && f.contentWindow && f.contentWindow.badgeReplay) f.contentWindow.badgeReplay();
+  else if (f) f.src = f.src;
+  if (v) { v.currentTime = 0; v.play().catch(() => {}); }
+}
+function showDetail(id) {
+  const i = BADGES.findIndex(b => b.id === id);
+  if (i < 0) return showHome();
+  current = BADGES[i];
+  document.body.classList.add('show-detail');
+  document.title = `${current.title} · Badge Motion`;
+  const prev = BADGES[(i + BADGES.length - 1) % BADGES.length], next = BADGES[(i + 1) % BADGES.length];
+  $('#prev').href = `#/${prev.id}`; $('#prev').title = prev.title;
+  $('#next').href = `#/${next.id}`; $('#next').title = next.title;
+  const b = current;
+  $('#info').innerHTML = `
+    <div class="kicker">${String(i + 1).padStart(2, '0')} · ${b.kicker}</div>
+    <h2>${b.title}</h2>
+    <p class="lede">${b.lede}</p>
+    <div class="facts">
+      <span class="chip"><i style="background:var(--gold)"></i>${b.intro.toFixed(1)}s intro</span>
+      <span class="chip"><i style="background:var(--cyan)"></i>4s seamless loop</span>
+      <span class="chip"><i style="background:var(--violet)"></i>${b.layers.length} animated layers</span>
+    </div>
+    <div class="section"><h3>Choreography</h3>
+      <ol class="beats">${b.beats.map(([t, what, how]) => `<li class="beat${t === 'idle' ? ' idle' : ''}"><time>${t}</time><div><b>${what}</b><span>${how}</span></div></li>`).join('')}</ol>
+    </div>
+    <div class="section"><h3>Downloads</h3>
+      <div class="dl">${DOWNLOADS.map(([k, label, kind, f]) => `<a href="${path(b.id, f(b.id))}" download><b>${label}</b><small>${kind}</small></a>`).join('')}</div>
+    </div>
+    <div class="section"><h3>Layer names the animation uses</h3>
+      <div class="tags">${b.layers.map(l => `<span class="tag">${l}</span>`).join('')}</div>
+    </div>`;
+  setView('live');
+  window.scrollTo({ top: 0 });
+}
+function showHome() {
+  current = null;
+  document.body.classList.remove('show-detail');
+  document.title = 'Badge Motion';
+  $('#stage').replaceChildren();
+}
+function route() {
+  const id = location.hash.replace(/^#\/?/, '');
+  id ? showDetail(id) : showHome();
+}
+document.querySelectorAll('.seg button').forEach(btn => btn.addEventListener('click', () => setView(btn.dataset.view)));
+$('#replay').addEventListener('click', replay);
+addEventListener('hashchange', route);
+addEventListener('keydown', e => {
+  if (!current) return;
+  if (e.key === 'Escape') location.hash = '#/';
+  if (e.key === 'ArrowRight') location.hash = $('#next').getAttribute('href');
+  if (e.key === 'ArrowLeft') location.hash = $('#prev').getAttribute('href');
+});
+route();
+</script>
+</body>
+</html>
